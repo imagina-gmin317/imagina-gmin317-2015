@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 
     TriangleWindow window;
     window.setFormat(format);
-    window.resize(640, 480);
+    window.resize(800, 600);
     window.show();
 
     window.setAnimating(true);
@@ -134,6 +134,31 @@ void TriangleWindow::initialize()
 //! [4]
 
 //! [5]
+
+
+GLfloat *getColors(){
+    GLfloat *couleurs= new GLfloat[16*16*3];
+    for(int i = 0;i<(16*16*3);i++){
+        couleurs[i] = 1.0f;
+    }
+    return couleurs;
+}
+
+
+GLfloat *getPoints(float cpt2){
+    GLfloat *points= new GLfloat[16*2*2];
+    float cpt1=-0.8f;
+    for(int i = 0;i<16*2*2;i+=4){
+        points[i]=cpt1;
+        points[i+1]=cpt2;
+        points[i+2]=cpt1;
+        points[i+3]=cpt2+0.1f;
+        cpt1+=0.1f;
+    }
+    return points;
+}
+
+
 void TriangleWindow::render()
 {
     const qreal retinaScale = devicePixelRatio();
@@ -150,25 +175,28 @@ void TriangleWindow::render()
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     GLfloat vertices[] = {
-        0.0f, 0.707f,
-        -0.5f, -0.5f,
-        0.5f, -0.5f
+        0.0f, 0.0f,
+        0.0f, 0.2f,
+        0.2f, 0.0f,
+        0.2f, 0.2f,
+        0.4f, 0.0f,
+        0.4f, 0.2f
     };
 
     GLfloat colors[] = {
-        1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 1.0f
+        1.0f, 1.0f, 1.0f
     };
 
-    glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+    glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, getPoints(-0.8f));
+    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, getColors());
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 16*2);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
