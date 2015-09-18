@@ -61,6 +61,9 @@ public:
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
 
+protected:
+    bool event(QEvent *event) Q_DECL_OVERRIDE;
+
 private:
     GLuint loadShader(GLenum type, const char *source);
     GLfloat* initVertices(GLint countX, GLint countY);
@@ -75,6 +78,7 @@ private:
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
+    int n;
 };
 
 TriangleWindow::TriangleWindow()
@@ -193,6 +197,7 @@ void TriangleWindow::initialize()
 
     this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
     this->vertices = initVertices(sizeX, sizeY);
+    n = 0;
 
 }
 //! [4]
@@ -200,17 +205,17 @@ void TriangleWindow::initialize()
 //! [5]
 void TriangleWindow::render()
 {
-    qreal retinaScale = 1.0f;
-    glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+    qreal retinaScale = 16.0f/9.0f;
+    glViewport(-width() * 0.5f, -height() * 0.5f, width() * retinaScale, height() * retinaScale);
 
     glClear(GL_COLOR_BUFFER_BIT);
 
     m_program->bind();
 
     QMatrix4x4 matrix;
-    matrix.perspective(60.0f, 16.0f/11.0f, 0.1f, 100.0f);
+    matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
     matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 1, 0, 0);
+    matrix.rotate(100.0f * n / screen()->refreshRate(), 1, 0, 0);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
@@ -224,15 +229,37 @@ void TriangleWindow::render()
     glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
 
     glEnableVertexAttribArray(0);
-//    glEnableVertexAttribArray(1);
+    //    glEnableVertexAttribArray(1);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeX * sizeY * 2 + sizeX + 1);
 
-//    glDisableVertexAttribArray(1);
+    //    glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
 
     m_program->release();
 
     ++m_frame;
+}
+
+bool TriangleWindow::event(QEvent *event)
+{
+    QKeyEvent *e;
+
+    switch (event->type()) {
+    case QEvent::KeyPress:
+        e = static_cast<QKeyEvent*>(event);
+
+        if(e->key() == Qt::Key_Space) {
+            n++;
+        }
+
+        n++;
+        return true;
+    case QEvent::KeyRelease:
+        this->pressed = false;
+        return true;
+
+    }
+    OpenGLWindow::event(event);
 }
 //! [5]

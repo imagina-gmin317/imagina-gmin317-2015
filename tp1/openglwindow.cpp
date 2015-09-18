@@ -55,6 +55,7 @@ OpenGLWindow::OpenGLWindow(QWindow *parent)
     , m_device(0)
 {
     setSurfaceType(QWindow::OpenGLSurface);
+
 }
 //! [1]
 
@@ -98,11 +99,15 @@ void OpenGLWindow::renderLater()
 bool OpenGLWindow::event(QEvent *event)
 {
     switch (event->type()) {
-    case QEvent::KeyPress:
-        qDebug("keypressed event");
-//        QKeyEvent* e = dynamic_cast<QKeyEvent*>(event);
-////        qDebug("e : " + e.key());
-        return true;
+//    case QEvent::KeyPress:
+//        qDebug("keypressed event");
+//        this->pressed = true;
+////        QKeyEvent* e = dynamic_cast<QKeyEvent*>(event);
+//////        qDebug("e : " + e.key());
+//        return true;
+//    case QEvent::KeyRelease:
+//        this->pressed = false;
+//        return true;
     case QEvent::UpdateRequest:
         m_update_pending = false;
         renderNow();
