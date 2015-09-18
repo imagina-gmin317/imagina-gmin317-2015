@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE abiword PUBLIC "-//ABISOURCE//DTD AWML 1.0 Strict//EN" "http://www.abisource.com/awml.dtd">
+<abiword template="false" xmlns:ct="http://www.abisource.com/changetracking.dtd" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:math="http://www.w3.org/1998/Math/MathML" xid-max="117" xmlns:dc="http://purl.org/dc/elements/1.1/" fileformat="1.1" xmlns:svg="http://www.w3.org/2000/svg" xmlns:awml="http://www.abisource.com/awml.dtd" xmlns="http://www.abisource.com/awml.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" version="3.0.0" xml:space="preserve" props="dom-dir:ltr; document-footnote-restart-section:0; document-endnote-type:numeric; document-endnote-place-enddoc:1; document-endnote-initial:1; lang:fr-FR; document-endnote-restart-section:0; document-footnote-restart-page:0; document-footnote-type:numeric; document-footnote-initial:1; document-endnote-place-endsection:0">
+<!-- ======================================================================== -->
+<!-- This file is an AbiWord document.                                        -->
+<!-- AbiWord is a free, Open Source word processor.                           -->
+<!-- More information about AbiWord is available at http://www.abisource.com/ -->
+<!-- You should not edit this file by hand.                                   -->
+<!-- ======================================================================== -->
+
+<metadata>
+<m key="abiword.generator">AbiWord</m>
+<m key="dc.format">application/x-abiword</m>
+</metadata>
+<rdf>
+</rdf>
+<styles>
+<s type="P" name="Title" basedon="_Normal" followedby="_Normal" props="lang:en-US; font-size:26.000000pt; margin-bottom:15.000000pt; font-family:Times New Roman; color:17365D"/>
+<s type="P" name="_Normal" basedon="Normal" props="lang:en-US"/>
+<s type="P" name="Normal" basedon="Normal" followedby="Current Settings" props="lang:ar-SA; font-size:12.000000pt; font-family:Times New Roman"/>
+<s type="P" name="Subtitle" basedon="_Normal" followedby="_Normal" props="lang:en-US; line-height:1.150000; margin-bottom:10.000000pt; font-family:Times New Roman; color:4F81BD; font-style:italic"/>
+<s type="P" name="heading 1" basedon="_Normal" followedby="_Normal" props="margin-top:24.000000pt; font-size:14.000000pt; lang:en-US; line-height:1.150000; color:365F91; font-weight:bold; font-family:Times New Roman"/>
+<s type="P" name="List Paragraph" basedon="_Normal" props="margin-left:36.000000pt"/>
+<s type="P" name="Balloon Text" basedon="_Normal" props="font-family:Lucida Grande; font-size:9.000000pt"/>
+<s type="C" name="Default Paragraph Font" basedon="Normal"/>
+<s type="C" name="FollowedHyperlink" basedon="Default Paragraph Font" props="text-decoration:underline; color:800080"/>
+<s type="C" name="Hyperlink" basedon="Default Paragraph Font" props="text-decoration:underline; color:0000FF"/>
+<s type="P" name="No List" basedon="Normal"/>
+<s type="P" name="Normal Table" basedon="Normal"/>
+<s type="C" name="Sous-titre Car" basedon="Default Paragraph Font" props="lang:en-US; font-family:Times New Roman; color:4F81BD; font-style:italic"/>
+<s type="C" name="Texte de bulles Car" basedon="Default Paragraph Font" props="lang:en-US; font-size:9.000000pt; font-family:Lucida Grande"/>
+<s type="C" name="Titre 1 Car" basedon="Default Paragraph Font" props="lang:en-US; font-weight:bold; font-size:14.000000pt; font-family:Times New Roman; color:365F91"/>
+<s type="C" name="Titre Car" basedon="Default Paragraph Font" props="lang:en-US; font-size:26.000000pt; font-family:Times New Roman; color:17365D"/>
+</styles>
+<lists>
+<l id="110" parentid="0" type="5" start-value="1" list-delim="%L." list-decimal="."/>
+<l id="120" parentid="0" type="5" start-value="1" list-delim="%L." list-decimal="."/>
+</lists>
+<pagesize pagetype="Custom" orientation="portrait" width="209.902781" height="297.038878" units="mm" page-scale="1.000000"/>
+<section xid="3" props="page-margin-right:0.984028in; column-line:off; page-margin-left:0.984028in; columns:1; page-margin-top:0.590972in; page-margin-bottom:0.590972in">
+<p style="Title" xid="4" props="text-align:center">GMINT317 - Moteurs de jeux – TP1</p>
+<p style="Title" xid="5" props="text-align:center">Rendu, gestionnaire de version et IHM</p>
+<p style="Subtitle" xid="6" props="text-align:center">Rémi Ronfard  <image dataid="rId6" xid="7" props="height:0.292851in; width:0.292851in"/>remi.ronfard@inria.fr<c props="font-family:Helvetica"> </c><image dataid="rId7" xid="8" props="height:0.195588in; width:0.195588in"/>https://team.inria.fr/imagine/team/</p>
+<p style="heading 1" xid="9" props="text-align:justify">Objectifs</p>
+<p xid="10" props="text-align:justify"><c props="lang:fr-FR">Le but de ce TP est de réaliser votre première application de rendu 3D en utilisant OpenGL. Dans ce travail, chaque étudiant aura pour but de réaliser différentes tâches :</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="11" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="12" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Découvrir les environnements Git, Qt et OpenGL.</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="13" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="14" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Apprendre à gérer les évènements (clavier, souris)</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="15" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="16" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Afficher une scène simple (une caméra et un triangle)</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="17" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="18" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Créer une surface carrée à base de triangles</c><bookmark type="start" name="_GoBack" xid="19"/><bookmark type="end" name="_GoBack" xid="20"/></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="21" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="22" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Appliquer une carte d’altitude sur cette surface</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="23" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="24" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Permettre les déplacements de caméra</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="25" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="26" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Avoir « commité » sur le serveur son projet en fin de séance</c></p>
+<p style="List Paragraph" xid="27" props="text-align:justify; margin-left:0.000000pt"><c props="lang:fr-FR">Bonus :</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="28" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="29" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Gérer les collisions caméra-terrain</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="30" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="31" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Texturer le terrain en utilisant des couleurs</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="32" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="33" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Jouer avec la lumière</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="34" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="35" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Afficher un brouillard localisé</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="36" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="37" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Créer un rendu terrain infini</c></p>
+<p style="heading 1" xid="38" props="text-align:justify">Framework</p>
+<p xid="39" props="text-align:justify"><c props="lang:fr-FR">Pour nos différents TP, nous allons utiliser le Framework Qt. Il s’agit d’un Framework spécialisé dans les UI. Nous nous servirons principalement de ce Framework afin de gérer les IO de notre application.</c></p>
+<p style="heading 1" xid="40" props="text-align:justify">Gestionnaire de version</p>
+<p xid="41" props="text-align:justify"><c props="lang:fr-FR">La première étape à réaliser est de créer votre compte sur GitHub, puis de me donner vos identifiants pour que je vous ouvre les droits d’accès  au repository du cours. </c></p>
+<p xid="42" props="text-align:justify"><c></c></p>
+<p xid="43" props="text-align:justify"><a xlink:href="https://github.com/imagina-gmin317/imagina-gmin317-2015/tp1" xid="44"><c props="lang:fr-FR">https://github.com/imagina-gmin317/imagina-gmin317-2015/</c></a></p>
+<p xid="46" props="text-align:justify"><c></c></p>
+<p xid="47" props="text-align:justify"><c props="lang:fr-FR">A partir de la, vous pourrez accéder au site, et cloner le premier TP.</c></p>
+<p xid="48" props="text-align:justify"><c></c></p>
+<p xid="49" props="text-align:justify"><c props="lang:fr-FR">git clone </c><a xlink:href="https://github.com/imagina-gmin317/imagina-gmin317-2015/tp1" xid="50"><c props="lang:fr-FR">https://github.com/imagina-gmin317/imagina-gmin317-2015/</c></a><c props="lang:fr-FR">tp1</c></p>
+<p xid="52" props="text-align:justify"><c></c></p>
+<p xid="53" props="text-align:justify"><c props="lang:fr-FR">Placez vous dans le répertoire de votre repository et créez une branche du TP à votre nom. :</c></p>
+<p xid="54" props="text-align:justify"><c></c></p>
+<p xid="55" props="text-align:justify"><c props="lang:fr-FR">git branch myname</c></p>
+<p xid="56" props="text-align:justify"><c></c></p>
+<p xid="57" props="text-align:justify"><c props="lang:fr-FR">Vous pouvez maintenant travailler sur votre TP. N’oubliez pas de faire un commit de votre travail en fin de séance, puis à chaque fois que nécessaire jusqu’à la prochaine séance pour que vos modifications soient prises en compte. Chaque commit doit être accompagné d’un message de commentaire.</c></p>
+<p xid="58" props="text-align:justify"><c></c></p>
+<p xid="59" props="text-align:justify"><c props="font-weight:bold; lang:fr-FR">Attention : </c><c props="lang:fr-FR">éviter les messages de commit inutiles, toujours décrire le travail réalisé.</c></p>
+<p style="heading 1" xid="60" props="text-align:justify">Votre première application</p>
+<p xid="61" props="text-align:justify"><c props="lang:fr-FR">Afin de vous familiariser avec Qt et de simplifier votre développement, je vous recommande d’utiliser l’IDE fourni : Qt Creator. L’objectif de ce premier TP est principalement de vous familiariser avec cet environnement de programmation.</c></p>
+<p xid="62" props="text-align:justify"><c></c></p>
+<p xid="63" props="text-align:justify"><c props="lang:fr-FR">Pour vos premiers pas, avec OpenGL, votre travail sera d’étudier l’affichage d’un triangle en OpenGL avec Qt et l’étendre :</c></p>
+<p xid="64" props="text-align:justify"><c></c></p>
+<p xid="65" props="text-align:justify"><c props="lang:fr-FR">Ouvrir le projet openglwindow.pro dans QT creator, compiler et exécuter.</c></p>
+<p xid="66" props="text-align:justify"><c></c></p>
+<p xid="67" props="text-align:justify"><c props="lang:fr-FR">Documentation :  http://qt-project.org/doc/qt-5/qtgui-openglwindow-example.html</c></p>
+<p xid="68" props="text-align:justify"><c></c></p>
+<p xid="69" props="text-align:justify"><c props="lang:fr-FR">Après le rendu de votre premier triangle, vous allez devoir réaliser une surface plane (16*16 sommets) composée de triangles. Grâce aux IO, vous pourrez afficher soit des triangles pleins, soit des triangles en fil de fer.</c></p>
+<p xid="70" props="text-align:right"><c></c></p>
+<p xid="71" props="text-align:justify"><c props="lang:fr-FR">Une fois cette surface créée, appliquez des transformations aléatoires aux sommets pour réaliser un relief.</c></p>
+<p style="heading 1" xid="72" props="text-align:justify">Mouvements de caméra</p>
+<p xid="73" props="text-align:justify"><c props="lang:fr-FR">Afin de vous guider, les interactions avec Opengl seront réalisées avec les évènements Qt, cette stratégie sera utilisée pour déplacer la caméra :</c></p>
+<p level="0" listid="120" parentid="0" style="List Paragraph" xid="74" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="120" parentid="0" style="List Paragraph" type="list_label" xid="75" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="120" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">QMouseEvent</c></p>
+<p level="0" listid="120" parentid="0" style="List Paragraph" xid="76" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="120" parentid="0" style="List Paragraph" type="list_label" xid="77" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="120" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">QKeyEvent</c></p>
+<p style="List Paragraph" xid="78" props="text-align:justify"><c></c></p>
+<p xid="79" props="text-align:justify"><c props="lang:fr-FR">Ces IO permettront de déplacer la caméra dans l’espace : en avant (E), en arrière (D), à droite(F), à gauche (S). </c></p>
+<p style="heading 1" xid="80">Cartes d’altitudes</p>
+<p xid="81" props="text-align:justify"><c></c></p>
+<p xid="82" props="text-align:justify"><c props="lang:fr-FR">Nous utiliserons ensuite une carte d’altitude (entrée fichier de l’application) grâce aux routines élémentaires de chargement d’une image dans Qt. </c></p>
+<p xid="83" props="text-align:justify"><c></c></p>
+<p xid="84" props="text-align:justify"><c props="lang:fr-FR">Pour chaque sommet de notre maillage de terrain, nous appliquerons un déplacement au sommet en corrélation avec la valeur du pixel correspondant dans la carte d’altitude. </c></p>
+<p xid="85" props="text-align:justify"><c></c></p>
+<p xid="86" props="text-align:justify"><c props="lang:fr-FR">Attention, il faudra augmenter la résolution du maillage à 240 x 240 pour répondre à cette question.</c></p>
+<p style="heading 1" xid="87" props="text-align:justify">Compte rendu</p>
+<p xid="88"><c props="lang:fr-FR">Présenter vos fonctionnalités. </c></p>
+<p xid="89" props="text-align:justify"><c props="lang:fr-FR">Expliquer votre démarche de développement.</c></p>
+<p xid="90" props="text-align:justify"><c props="lang:fr-FR">Présenter votre structure de données.</c></p>
+<p xid="91" props="text-align:justify"><c props="lang:fr-FR">Expliquer comment vous vous y prendriez pour les parties bonus.</c></p>
+<p style="heading 1" xid="92" props="text-align:justify">Bonus</p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="93" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="94" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Gérer les collisions caméra-terrain</c></p>
+<p xid="95" props="text-align:justify"><c props="lang:fr-FR">Empêcher la caméra de traverser la surface du sol.</c></p>
+<p xid="96" props="text-align:justify"><c></c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="97" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="98" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Texturer le terrain en utilisant des couleurs</c></p>
+<p xid="99" props="text-align:justify"><c props="lang:fr-FR">Utiliser la coloration de sommets pour texturer votre terrain. </c></p>
+<p xid="100" props="text-align:justify"><c props="lang:fr-FR">Appliquer des textures en fonction de l’altitude des sommets (blanc pour les sommets très élevés par exemple).</c></p>
+<p xid="101" props="text-align:justify"><c></c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="102" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="103" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Jouer avec la lumière</c></p>
+<p xid="104" props="text-align:justify"><c props="lang:fr-FR">Créer une lumière de type soleil.</c></p>
+<p xid="105" props="text-align:justify"><c props="lang:fr-FR">Créer des lumières localisées.</c></p>
+<p xid="106" props="text-align:justify; tabstops:4.176389in/L0"><c props="lang:fr-FR">Jouer avec les matériaux, les modèles de lumières.</c></p>
+<p xid="107" props="text-align:justify"><c></c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="108" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="109" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Afficher un brouillard localisé</c></p>
+<p xid="110" props="text-align:justify"><c props="lang:fr-FR">En deux étapes, réaliser un brouillard global puis un brouillard localisé.</c></p>
+<p xid="111" props="text-align:justify"><c props="lang:fr-FR">Utiliser la fonction </c><c props="lang:fr-FR; font-weight:bold; font-style:italic">glFog()</c><c props="font-weight:bold; lang:fr-FR"> </c><c props="lang:fr-FR">pour afficher un brouillard. </c></p>
+<p xid="112" props="text-align:justify"><c props="lang:fr-FR">Afficher un brouillard localisé dans les vallées.</c></p>
+<p style="List Paragraph" xid="113" props="text-align:justify"><c></c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="114" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="115" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-align:justify; text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	</c><c props="lang:fr-FR">Créer un rendu terrain infini</c></p>
+<p xid="116" props="text-align:justify"><c props="lang:fr-FR">Réfléchir à une stratégie multi-résolution du terrain pour permettre un rendu infini.</c></p>
+<p xid="117" props="text-align:justify"><c props="lang:fr-FR">Générer aléatoirement un rendu cohérent.</c></p>
+</section>
+<data>
+<d name="rId6" mime-type="image/png" base64="yes">
+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
+</d>
+<d name="rId7" mime-type="image/png" base64="yes">
+iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9i
+ZSBJbWFnZVJlYWR5ccllPAAABKNJREFUeNq8V91PVEcUP7sCRqDIsiAJkoiGpoiNSUVFVKDK
+x7KAtkqhxY+UB/0HSPw32j9AnoxfaU2tAdnViAt+JJLoS9/qgy9Nk9oUiihsKey9Pb/pncvc
+2bnXG2Oc5OzcOTNzzpnf+ZjZiG3bhPZzJvMdd+fIp92amPjoi/7+1/T+2tiXR46MEgwA/XT/
+/qLFH4IsS1BOoZHRUXuN+7Vczl516F+FVtbWXPqHKcu0vLrqS9AHvVFpjkBCEsYO/046vW4z
+jFXPoO1R5URA+hqFJPLrBliWq1hV8sO9e+5Y7fVv22fetMZW9BWoluubXDT0E6oKeDw+MxPK
+6T2trXlyXAMsVYminHSjfHh97e1GN0lZqYcPPfss3QBAYutGcBscGKDzFy6I3hWux4LGS2Uy
+9GZpiQZ6e4kiETOSugssg1CMu5qbBbm+80FKzi8tL9OvL16IdX/Oz1NVPG5E8K0I6Eo8sOpx
+oMRQ8aZN9HFdHS1ls1RZUbGeXe+CgK+yAAQwjm7YQIWFhUZEfRGwDAhMPn5MleXltK+xka6k
+UlRbXU1/zM3R501NNMFBNXL8uMfQ31++pAzvmV9YELxrN29SC6/dVlubh4DlIBD1IKBR086d
+tJeVY9twTw81MLTtLBDjb48dE2uwL8KBhj7NwbewuEjRaFTQ369eUXp62l2jyjbHgAZXZSzm
+qQ9y7HEDIIdw/h4ZGvKNHazxuCMvBgwuuHT7Np3lVLrG5bjzwAGamp2loe5u4Y7GHTuosKBA
+9Djt9JMngUUIayw1BowGaMFyhpVj2dcM/1/s18FEQhg5nEx6Ir91//78gDVkFBliwJMFajXU
+Uy++eTN25WWAHVCi7QBEjFmgb7o0Pi76s/39dGVykko4x4s4vT6trxcZcZ1ds7GoSLiir62N
+LrPL0JKHDlGKs6GspIT27tpFvzx/Tt0HD3oNCHKBPEkvXx44Ob4TLCDOKQlXSB5cM8fjCozZ
+eCiuKCsTc6ccN81zJnS3tOS5xGiA7gIhzOEJJbwmrvBsyXe2xBzlasO80QVhsuAqRzuSB/Cl
+Hj2iUxyUcIW4WpmXZpjBu+rwEozAHeapDbyZp0/pxNGjwQboyjFOMHQ4AWCEIunfmOT19f1v
+jMOTCvVTn+jo8C3xgQjEHHiFcCdAAbN0j8tTFPpBHs4F2iIUHij6rKGBbvDTrKaqSlyxrXv2
+CPiHUaTYTeWlpdS8eze95jfAtpoa+vHuXbEPKrJ8K1bzlYz5YAMMhQOKZZANdHWJS+YTvg/Q
+pEsQC9JNdawcDdVSZoBvEJruAvKJ4IiSCX5rguZMzQ6DACI+4gQZhMlol4VGtqQzj8Ikbzq5
+5jQjxf8B6KSeBWEQwGYVxqQS4acdF6jz33BhUsdyDd4PoRCIaFemuAO4+pm+/Xhh1pgRkP9k
+lIYILy0upuzKCnXwwxTF6AznPqCu2bKF2jgb3Pp/+DA9ePaMcrkcfcUBe2NqijbyHbF961b6
+jV9KQC+wDtgGBBDpqPU4AXpcSmio7fJUvaxYnhKvJckf7Ox05SB9ddl2GATEK8gRWKnAGObb
+JONtBox9f/HiOfpwbQw//wkwAMUre8abIhrjAAAAAElFTkSuQmCC
+</d>
+</data>
+</abiword>

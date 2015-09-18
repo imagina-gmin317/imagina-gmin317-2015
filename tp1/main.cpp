@@ -59,6 +59,9 @@ public:
 private:
     GLuint loadShader(GLenum type, const char *source);
 
+    GLfloat *getSurface(int nbPoint);
+    GLfloat *generatePoint(int nbPoint);
+
     GLuint m_posAttr;
     GLuint m_colAttr;
     GLuint m_matrixUniform;
@@ -146,15 +149,18 @@ void TriangleWindow::render()
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
     matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
-
+    //matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-    GLfloat vertices[] = {
-        0.0f, 0.707f,
-        -0.5f, -0.5f,
-        0.5f, -0.5f
-    };
+   /* GLfloat vertices[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f,1.0f
+
+    };*/
+
+    GLfloat *vertices = getSurface(3);
 
     GLfloat colors[] = {
         1.0f, 0.0f, 1.0f,
@@ -168,7 +174,7 @@ void TriangleWindow::render()
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 3*3);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
@@ -177,4 +183,46 @@ void TriangleWindow::render()
 
     ++m_frame;
 }
+
+/**
+ * @brief TriangleWindow::getSurface
+ * @return tableau de nbPoint*nbPoint points à 3 paramètres, représentant une surface
+ */
+GLfloat* TriangleWindow::getSurface(int nbPoint){
+    GLfloat *vertices;
+    vertices = generatePoint(nbPoint);
+
+    return vertices;
+}
+
+/**
+ * @brief TriangleWindow::generatePoint
+ * @param nbPoint
+ * @return un tableau de nbPoint*nbPoint pour créer une surface (dans getSurface)
+ */
+GLfloat* TriangleWindow::generatePoint(int nbPoint){
+    GLfloat point[nbPoint*nbPoint*3];
+    float stepX = 1.0f / (float)nbPoint-1;
+    float stepY = 1.0f / (float)nbPoint-1;
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+    int cpt =0;
+    for(int i=0;i<nbPoint;i++){
+        x = 0.0f;
+        for(int j=0;j<nbPoint;j++){
+            x+=(stepX*i);
+            y+=(stepY*j);
+            point[cpt++]=x;
+            point[cpt++]=y;
+            point[cpt++]=z;
+        }
+    }
+
+    for(int i=0;i<nbPoint*nbPoint;i+=3){
+        qDebug()<<point[i]<<":"<<point[i+1]<<":"<<point[i+2];
+    }
+    return point;
+}
+
 //! [5]
