@@ -46,14 +46,15 @@
 #include <QtGui/QScreen>
 
 #include <QtCore/qmath.h>
+#include <QtGlobal>
 
 //! [1]
 class TriangleWindow : public OpenGLWindow
 {
 public:
     TriangleWindow();
-    int sizeX = 8;
-    int sizeY = 8;
+    int sizeX = 4;
+    int sizeY = 4;
 
 
     void initialize() Q_DECL_OVERRIDE;
@@ -68,6 +69,7 @@ private:
     GLuint m_matrixUniform;
 
     GLfloat* vertices;
+    float getRandomZ(float i, float j);
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
@@ -88,14 +90,6 @@ GLfloat *TriangleWindow::initVertices(GLint countX, GLint countY)
     GLfloat stepY = 1.0 / (countY);
     int cpt = 0;
 
-    array[cpt++] = -0.5f;
-    array[cpt++] = -0.5f;
-    array[cpt++] = 0;
-
-    array[cpt++] = -0.5f + stepX;
-    array[cpt++] = -0.5f;
-    array[cpt++] = 0;
-
     float posX = -0.5f;
     float posY = -0.5f;
 
@@ -103,27 +97,37 @@ GLfloat *TriangleWindow::initVertices(GLint countX, GLint countY)
 
     for (int i = 0; i < countX; ++i) {
         for (int j = 0; j < countY; ++j) {
-            if(cpt < count) {
-                posY += stepY * flop;
-                array[cpt++] = posX;
-                array[cpt++] = posY;
-                array[cpt++] = 0;
+            array[cpt++] = posX;
+            array[cpt++] = posY;
+            array[cpt++] = getRandomZ(posX, posY);
 
-                array[cpt++] = posX + stepX;
-                array[cpt++] = posY;
-                array[cpt++] = 0;
-            }
-        }
-        posX += stepX;
-        flop *= -1;
-        if(i < countX - 1) {
             array[cpt++] = posX + stepX;
             array[cpt++] = posY;
-            array[cpt++] = 0;
+            array[cpt++] = getRandomZ(posX + stepX, posY);
 
+            posY += stepY * flop;
         }
+
+        array[cpt++] = posX;
+        array[cpt++] = posY;
+        array[cpt++] = getRandomZ(posX, posY);
+
+        flop *= -1;
+        posX += stepX;
     }
+
+    array[cpt++] = posX;
+    array[cpt++] = posY;
+    array[cpt++] = getRandomZ(posX, posY);
+    qDebug() << cpt;
     return array;
+}
+
+float TriangleWindow::getRandomZ(float i, float j)
+{
+//    return (qrand() % 10) * 0.005f - 0.005f;
+    qDebug() << sin(i + j) * 0.1f;
+    return i * j;
 }
 
 
@@ -204,33 +208,26 @@ void TriangleWindow::render()
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/11.0f, 0.1f, 100.0f);
     matrix.translate(0, 0, -2);
-        matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+    matrix.rotate(10.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-    //    GLfloat vertices[] = {
-    //        0.0f, 0.707f,
-    //        -0.5f, -0.5f,
-    //        0.5f, -0.5f
-    //    };
-
     GLfloat colors[] = {
+        1.0f, 0.0f, 1.0f,
         1.0f, 1.0f, 1.0f,
-        1.0f, 1.0f, 1.0f,
-        1.0f, 1.0f, 1.0f
+        1.0f, 1.0f, 0.0f
     };
-
 
     glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
     glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
 
     glEnableVertexAttribArray(0);
-    //    glEnableVertexAttribArray(1);
+//    glEnableVertexAttribArray(1);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeX * sizeY * 2 + sizeX + 1);
 
-    //    glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+//    glDisableVertexAttribArray(0);
 
     m_program->release();
 
