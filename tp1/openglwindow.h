@@ -40,6 +40,7 @@
 
 #include <QtGui/QWindow>
 #include <QtGui/QOpenGLFunctions>
+#include <QKeyEvent>
 
 QT_BEGIN_NAMESPACE
 class QPainter;
