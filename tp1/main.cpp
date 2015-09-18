@@ -127,10 +127,7 @@ GLfloat *TriangleWindow::initVertices(GLint countX, GLint countY)
 
 float TriangleWindow::getRandomZ(float i, float j)
 {
-//    return (qrand() % 10) * 0.005f - 0.005f;
-//    qDebug() << floor(this->sizeX * (i + 0.5f));
     return qGray(this->image.pixel(floor(this->sizeX * (i + 0.5f)), floor(this->sizeY * (j + 0.5f)))) * 0.001f;
-//    return 0;
 }
 
 
@@ -163,7 +160,7 @@ static const char *vertexShaderSource =
         "varying lowp vec4 col;\n"
         "uniform highp mat4 matrix;\n"
         "void main() {\n"
-        "   col = colAttr;\n"
+        "   col = vec4(vec3(1, 1, 1) * posAttr.z * 5, 1);\n"
         "   gl_Position = matrix * posAttr;\n"
         "}\n";
 
@@ -194,10 +191,8 @@ void TriangleWindow::initialize()
     m_matrixUniform = m_program->uniformLocation("matrix");
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-2.png");
+    this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
     this->vertices = initVertices(sizeX, sizeY);
-
-    qDebug() << qGray(this->image.pixel(100, 100));
 
 }
 //! [4]
@@ -205,7 +200,7 @@ void TriangleWindow::initialize()
 //! [5]
 void TriangleWindow::render()
 {
-    const qreal retinaScale = 1;
+    qreal retinaScale = 1.0f;
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -215,7 +210,7 @@ void TriangleWindow::render()
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/11.0f, 0.1f, 100.0f);
     matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 1, 0, 0);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
@@ -225,16 +220,16 @@ void TriangleWindow::render()
         1.0f, 1.0f, 0.0f
     };
 
-    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
     glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
 
     glEnableVertexAttribArray(0);
 //    glEnableVertexAttribArray(1);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeX * sizeY * 2 + sizeX + 1);
 
-    glDisableVertexAttribArray(1);
-//    glDisableVertexAttribArray(0);
+//    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
 
     m_program->release();
 
