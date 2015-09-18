@@ -44,6 +44,7 @@
 #include <QtGui/QMatrix4x4>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QScreen>
+#include <iostream>
 
 #include <QtCore/qmath.h>
 
@@ -55,6 +56,7 @@ public:
 
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
+    GLfloat* generatePoints(int nb) Q_DECL_OVERRIDE;
 
 private:
     GLuint loadShader(GLenum type, const char *source);
@@ -84,7 +86,7 @@ int main(int argc, char **argv)
 
     TriangleWindow window;
     window.setFormat(format);
-    window.resize(640, 480);
+    window.resize(1000, 480);
     window.show();
 
     window.setAnimating(true);
@@ -150,11 +152,36 @@ void TriangleWindow::render()
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-    GLfloat vertices[] = {
-        0.0f, 0.707f,
-        -0.5f, -0.5f,
-        0.5f, -0.5f
-    };
+    int nbpoints = 4;
+
+    GLfloat *points = generatePoints(nbpoints);
+
+    int cpt = 0;
+    bool first = false;
+    int last = -1;
+    int combien = 6;
+    int totake = 0;
+
+    GLfloat vertices[combien*2];
+
+    for(int i = 0; i < combien; i++){
+        if(last != -1){
+            if(first){
+                totake = last - nbpoints + 1;
+                first = false;
+            }else{
+                totake = last + nbpoints;
+                first = true;
+            }
+        }
+        qDebug()<<totake;
+        last = totake;
+        vertices[cpt++] = points[totake*3];
+        vertices[cpt++] = points[totake*3 + 1];
+       // vertices[cpt++] = points[totake*3 + 2];
+    }
+
+
 
     GLfloat colors[] = {
         1.0f, 0.0f, 1.0f,
@@ -162,13 +189,15 @@ void TriangleWindow::render()
         0.0f, 1.0f, 1.0f
     };
 
+
+
     glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, combien);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
@@ -177,4 +206,21 @@ void TriangleWindow::render()
 
     ++m_frame;
 }
-//! [5]
+
+
+GLfloat* TriangleWindow::generatePoints(int nb){
+    GLfloat points[nb*nb*3];
+
+    float interval = 0.2f;
+
+    int cpt = 0;
+    for(int i = 0; i < nb; i++){
+        for(int j = 0; j < nb; j++){
+            points[cpt++] = i * interval;
+            points[cpt++] = j * interval;
+            points[cpt++] = 0.0f;
+
+        }
+    }
+    return points;
+}
