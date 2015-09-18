@@ -47,14 +47,15 @@
 
 #include <QtCore/qmath.h>
 #include <QtGlobal>
+#include <QtGui/QImage>
 
 //! [1]
 class TriangleWindow : public OpenGLWindow
 {
 public:
     TriangleWindow();
-    int sizeX = 4;
-    int sizeY = 4;
+    int sizeX = 240;
+    int sizeY = 240;
 
 
     void initialize() Q_DECL_OVERRIDE;
@@ -70,6 +71,7 @@ private:
 
     GLfloat* vertices;
     float getRandomZ(float i, float j);
+    QImage image;
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
@@ -126,8 +128,9 @@ GLfloat *TriangleWindow::initVertices(GLint countX, GLint countY)
 float TriangleWindow::getRandomZ(float i, float j)
 {
 //    return (qrand() % 10) * 0.005f - 0.005f;
-    qDebug() << sin(i + j) * 0.1f;
-    return i * j;
+//    qDebug() << floor(this->sizeX * (i + 0.5f));
+    return qGray(this->image.pixel(floor(this->sizeX * (i + 0.5f)), floor(this->sizeY * (j + 0.5f)))) * 0.001f;
+//    return 0;
 }
 
 
@@ -191,7 +194,11 @@ void TriangleWindow::initialize()
     m_matrixUniform = m_program->uniformLocation("matrix");
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-2.png");
     this->vertices = initVertices(sizeX, sizeY);
+
+    qDebug() << qGray(this->image.pixel(100, 100));
+
 }
 //! [4]
 
@@ -208,7 +215,7 @@ void TriangleWindow::render()
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/11.0f, 0.1f, 100.0f);
     matrix.translate(0, 0, -2);
-    matrix.rotate(10.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
