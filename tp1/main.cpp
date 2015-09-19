@@ -145,15 +145,19 @@ GLfloat *getColors(){
 }
 
 
-GLfloat *getPoints(float cpt2){
-    GLfloat *points= new GLfloat[16*2*2];
-    float cpt1=-0.8f;
-    for(int i = 0;i<16*2*2;i+=4){
-        points[i]=cpt1;
-        points[i+1]=cpt2;
-        points[i+2]=cpt1;
-        points[i+3]=cpt2+0.1f;
-        cpt1+=0.1f;
+GLfloat *getPoints(){
+    GLfloat *points= new GLfloat[16*16*3*6];
+    int i=-1;
+    for(float ligne=-0.8f; ligne <0.8f;ligne+=0.1f){
+        for(float colonne = -0.8f; colonne<0.8f;colonne+=0.2f){
+            qDebug() << "colonne:" << colonne << " ligne:" << ligne;
+            points[i++] = colonne;
+            points[i++] = 0.0f;
+            points[i++] = ligne;
+            points[i++] = colonne;
+            points[i++] = 0.0f;
+            points[i++] = ligne+0.1f;
+        }
     }
     return points;
 }
@@ -190,13 +194,13 @@ void TriangleWindow::render()
         1.0f, 1.0f, 1.0f
     };
 
-    glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, getPoints(-0.8f));
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, getPoints());
     glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, getColors());
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 16*2);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 16*16);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
