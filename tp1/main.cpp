@@ -78,7 +78,7 @@ private:
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
-    int n;
+    float n, x, y;
 };
 
 TriangleWindow::TriangleWindow()
@@ -193,12 +193,13 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
     this->vertices = initVertices(sizeX, sizeY);
     n = 0;
-
+    x = 0;
+    y = 0;
 }
 //! [4]
 
@@ -214,8 +215,10 @@ void TriangleWindow::render()
 
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
-    matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * n / screen()->refreshRate(), 1, 0, 0);
+    matrix.translate(0, 0, y);
+    matrix.rotate(100.0f * n, 1, 0, 0);
+    matrix.rotate(100.0f * x, 0, 0, 1);
+
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
@@ -250,15 +253,20 @@ bool TriangleWindow::event(QEvent *event)
         e = static_cast<QKeyEvent*>(event);
 
         if(e->key() == Qt::Key_Space) {
-            n++;
+            n += 0.1f;
+        } else if(e->key() == Qt::Key_Up) {
+            y += 0.1f;
+        } else if(e->key() == Qt::Key_Down) {
+            y -= 0.1f;
+        }  else if(e->key() == Qt::Key_Left) {
+            x -= 0.1f;
+        } else if(e->key() == Qt::Key_Right) {
+            x += 0.1f;
+        } else if (e->key() == Qt::Key_Escape) {
+            qApp->exit();
         }
 
-        n++;
         return true;
-    case QEvent::KeyRelease:
-        this->pressed = false;
-        return true;
-
     }
     OpenGLWindow::event(event);
 }
