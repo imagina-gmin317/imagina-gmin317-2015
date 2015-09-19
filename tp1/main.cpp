@@ -146,17 +146,18 @@ GLfloat *getColors(){
 
 
 GLfloat *getPoints(){
-    GLfloat *points= new GLfloat[16*16*3*6];
+    GLfloat *points= new GLfloat[16*16*6];
     int i=-1;
-    for(float ligne=-0.8f; ligne <0.8f;ligne+=0.1f){
-        for(float colonne = -0.8f; colonne<0.8f;colonne+=0.2f){
-            qDebug() << "colonne:" << colonne << " ligne:" << ligne;
+    for(float ligne=0.0f; ligne <1.6f;ligne+=0.1f){
+        for(float colonne = -0.8f; colonne<0.8f;colonne+=0.1f){
+            //qDebug() << "colonne:" << colonne << " ligne:" << ligne;
+            //qDebug()<< i << " ";
             points[i++] = colonne;
             points[i++] = 0.0f;
-            points[i++] = ligne;
+            points[i++] = 0.8f-ligne+0.1f;
             points[i++] = colonne;
             points[i++] = 0.0f;
-            points[i++] = ligne+0.1f;
+            points[i++] = 0.8f-ligne;
         }
     }
     return points;
