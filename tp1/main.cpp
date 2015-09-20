@@ -80,8 +80,8 @@ private:
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
-    float n, x, y;
-    float lastX, lastY;
+    float n, x, y, a, b;
+    int direction;
 };
 
 TriangleWindow::TriangleWindow()
@@ -189,6 +189,10 @@ GLuint TriangleWindow::loadShader(GLenum type, const char *source)
 
 void TriangleWindow::initialize()
 {
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+
     m_program = new QOpenGLShaderProgram(this);
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
@@ -202,7 +206,10 @@ void TriangleWindow::initialize()
     this->vertices = initVertices(sizeX, sizeY);
     n = 0;
     x = 0;
-    y = 0;
+    y = -0.14f;
+    a = 0;
+    b = 0;
+    this->direction = 0;
     this->cursor = new QCursor(Qt::SizeBDiagCursor);
 }
 //! [4]
@@ -219,12 +226,21 @@ void TriangleWindow::render()
 
     m_program->bind();
 
+
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
     matrix.rotate(100.0f * n, 1, 0, 0);
     matrix.rotate(100.0f * x, 0, 0, 1);
-    matrix.translate(0, 0, y);
+    matrix.translate(b, a, y);
 
+    if(direction != 0) {
+        a -= (matrix.data()[0]) * 0.001f * direction;
+        b += (matrix.data()[4]) * 0.001f * direction;
+
+    }
+
+    qDebug() << "a :" << cos(matrix.data()[0]);
+    qDebug() << "b :" << sin(matrix.data()[0]);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
@@ -248,6 +264,8 @@ void TriangleWindow::render()
     m_program->release();
 
     ++m_frame;
+    GLfloat lightpos[] = {0, 0, 1., 0.};
+    glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
 }
 
 bool TriangleWindow::event(QEvent *event)
@@ -267,21 +285,20 @@ bool TriangleWindow::event(QEvent *event)
         keyEvent = static_cast<QKeyEvent*>(event);
 
         if(keyEvent->key() == Qt::Key_Space) {
-            n += 0.1f;
-        }if(keyEvent->key() == Qt::Key_Alt) {
-            n -= 0.1f;
+            y += 0.01f;
+        } else if(keyEvent->key() == Qt::Key_Shift) {
+            y -= 0.01f;
         } else if(keyEvent->key() == Qt::Key_Up) {
-            y += 0.1f;
+            direction = 1;
         } else if(keyEvent->key() == Qt::Key_Down) {
-            y -= 0.1f;
-        }  else if(keyEvent->key() == Qt::Key_Left) {
-            x -= 0.1f;
-        } else if(keyEvent->key() == Qt::Key_Right) {
-            x += 0.1f;
+            direction = -1;
         } else if (keyEvent->key() == Qt::Key_Escape) {
             qApp->exit();
         }
 
+        return true;
+    case QEvent::KeyRelease:
+        direction = 0;
         return true;
     }
     OpenGLWindow::event(event);

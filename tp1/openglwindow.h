@@ -69,7 +69,6 @@ public slots:
 
 protected:
     bool event(QEvent *event) Q_DECL_OVERRIDE;
-    bool pressed;
 
     void exposeEvent(QExposeEvent *event) Q_DECL_OVERRIDE;
 
