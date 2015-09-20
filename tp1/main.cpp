@@ -61,6 +61,7 @@ private:
 
     GLfloat *getSurface(int nbPoint);
     GLfloat *generatePoint(int nbPoint);
+    void addPoint(GLfloat* vert,GLfloat *vertice, int ligne, int colonne);
 
     GLuint m_posAttr;
     GLuint m_colAttr;
@@ -149,7 +150,7 @@ void TriangleWindow::render()
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
     matrix.translate(0, 0, -2);
-    //matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
     m_program->setUniformValue(m_matrixUniform, matrix);
 
    /* GLfloat vertices[] = {
@@ -160,7 +161,7 @@ void TriangleWindow::render()
 
     };*/
 
-    GLfloat *vertices = getSurface(3);
+    GLfloat *vertices = getSurface(16);
 
     GLfloat colors[] = {
         1.0f, 0.0f, 1.0f,
@@ -174,7 +175,7 @@ void TriangleWindow::render()
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 3*3);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 16*16);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
@@ -187,12 +188,24 @@ void TriangleWindow::render()
 /**
  * @brief TriangleWindow::getSurface
  * @return tableau de nbPoint*nbPoint points à 3 paramètres, représentant une surface
+ * organise les points passés en paramètre pour la création des triangles de la surface
  */
 GLfloat* TriangleWindow::getSurface(int nbPoint){
     GLfloat *vertices;
+    GLfloat *vert;//les points organisés
     vertices = generatePoint(nbPoint);
+    for(int i =0;i<nbPoint;i++){
+        for(int j=0;j<nbPoint;j++){
+            addPoint(vert,vertices,i,j);
+            addPoint(vert,vertices,i+1,j);
+            addPoint(vert,vertices,i+1,j+1);
+            addPoint(vert,vertices,i,j);
+            addPoint(vert,vertices,i,j+1);
+            addPoint(vert,vertices,i+1,j+1);
+        }
+    }
 
-    return vertices;
+    return vert;
 }
 
 /**
@@ -202,8 +215,8 @@ GLfloat* TriangleWindow::getSurface(int nbPoint){
  */
 GLfloat* TriangleWindow::generatePoint(int nbPoint){
     GLfloat point[nbPoint*nbPoint*3];
-    float stepX = 1.0f / (float)nbPoint-1;
-    float stepY = 1.0f / (float)nbPoint-1;
+    float stepX = 1.0f / (float)(nbPoint-1);
+    float stepY = 1.0f / (float)(nbPoint-1);
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
@@ -211,18 +224,30 @@ GLfloat* TriangleWindow::generatePoint(int nbPoint){
     for(int i=0;i<nbPoint;i++){
         x = 0.0f;
         for(int j=0;j<nbPoint;j++){
-            x+=(stepX*i);
-            y+=(stepY*j);
             point[cpt++]=x;
             point[cpt++]=y;
             point[cpt++]=z;
+            x+=stepX;
         }
-    }
-
-    for(int i=0;i<nbPoint*nbPoint;i+=3){
-        qDebug()<<point[i]<<":"<<point[i+1]<<":"<<point[i+2];
+        y+=stepY;
     }
     return point;
+}
+/**
+ * @brief TriangleWindow::addPoint
+ * @param vert
+ * @param vertice
+ * @param nbPoint
+ * ajoute le point de la ligne "ligne" et de la colonne "colonne" à vert
+ */
+void TriangleWindow::addPoint(GLfloat *vert, GLfloat *vertice, int ligne, int colonne){
+    int size = (sizeof(vert)/sizeof(GLfloat));
+    GLfloat temp[size+1];
+    for(int i = 0;i<size;i++){
+        temp[i] = vert[i];
+    }
+    temp[size+1]=vertice[ligne+colonne];
+    vert = temp;
 }
 
 //! [5]
