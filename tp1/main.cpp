@@ -48,14 +48,15 @@
 #include <QtCore/qmath.h>
 #include <QtGlobal>
 #include <QtGui/QImage>
+#include <QCursor>
 
 //! [1]
 class TriangleWindow : public OpenGLWindow
 {
 public:
     TriangleWindow();
-    int sizeX = 240;
-    int sizeY = 240;
+    static const int sizeX = 240;
+    static const int sizeY = 240;
 
 
     void initialize() Q_DECL_OVERRIDE;
@@ -71,6 +72,7 @@ private:
     GLuint m_posAttr;
     GLuint m_colAttr;
     GLuint m_matrixUniform;
+    QCursor* cursor;
 
     GLfloat* vertices;
     float getRandomZ(float i, float j);
@@ -79,6 +81,7 @@ private:
     QOpenGLShaderProgram *m_program;
     int m_frame;
     float n, x, y;
+    float lastX, lastY;
 };
 
 TriangleWindow::TriangleWindow()
@@ -193,19 +196,22 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
     this->vertices = initVertices(sizeX, sizeY);
     n = 0;
     x = 0;
     y = 0;
+    this->cursor = new QCursor(Qt::SizeBDiagCursor);
 }
 //! [4]
 
 //! [5]
 void TriangleWindow::render()
 {
+    this->cursor->setPos(this->position().x() + width() * 0.5f, this->position().y() + height() * 0.5f);
+
     qreal retinaScale = 16.0f/9.0f;
     glViewport(-width() * 0.5f, -height() * 0.5f, width() * retinaScale, height() * retinaScale);
 
@@ -215,9 +221,9 @@ void TriangleWindow::render()
 
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
-    matrix.translate(0, 0, y);
     matrix.rotate(100.0f * n, 1, 0, 0);
     matrix.rotate(100.0f * x, 0, 0, 1);
+    matrix.translate(0, 0, y);
 
 
     m_program->setUniformValue(m_matrixUniform, matrix);
@@ -246,23 +252,33 @@ void TriangleWindow::render()
 
 bool TriangleWindow::event(QEvent *event)
 {
-    QKeyEvent *e;
+    QKeyEvent *keyEvent;
+    QMouseEvent *mouseEvent;
+    float deltaX = this->width() * 0.5f;
+    float deltaY = this->height() * 0.5f;
 
     switch (event->type()) {
+    case QEvent::MouseMove:
+        mouseEvent = static_cast<QMouseEvent*>(event);
+        this->x -= (deltaX - mouseEvent->x()) * 0.001f;
+        this->n -= (deltaY - mouseEvent->y()) * 0.001f;
+        return true;
     case QEvent::KeyPress:
-        e = static_cast<QKeyEvent*>(event);
+        keyEvent = static_cast<QKeyEvent*>(event);
 
-        if(e->key() == Qt::Key_Space) {
+        if(keyEvent->key() == Qt::Key_Space) {
             n += 0.1f;
-        } else if(e->key() == Qt::Key_Up) {
+        }if(keyEvent->key() == Qt::Key_Alt) {
+            n -= 0.1f;
+        } else if(keyEvent->key() == Qt::Key_Up) {
             y += 0.1f;
-        } else if(e->key() == Qt::Key_Down) {
+        } else if(keyEvent->key() == Qt::Key_Down) {
             y -= 0.1f;
-        }  else if(e->key() == Qt::Key_Left) {
+        }  else if(keyEvent->key() == Qt::Key_Left) {
             x -= 0.1f;
-        } else if(e->key() == Qt::Key_Right) {
+        } else if(keyEvent->key() == Qt::Key_Right) {
             x += 0.1f;
-        } else if (e->key() == Qt::Key_Escape) {
+        } else if (keyEvent->key() == Qt::Key_Escape) {
             qApp->exit();
         }
 
