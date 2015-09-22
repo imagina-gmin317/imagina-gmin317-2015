@@ -202,7 +202,7 @@ void TriangleWindow::initialize()
     m_matrixUniform = m_program->uniformLocation("matrix");
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
+    this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-2.png");
     this->vertices = initVertices(sizeX, sizeY);
     n = 0;
     x = 0;
@@ -210,7 +210,8 @@ void TriangleWindow::initialize()
     a = 0;
     b = 0;
     this->direction = 0;
-    this->cursor = new QCursor(Qt::SizeBDiagCursor);
+    this->cursor = new QCursor(Qt::BlankCursor);
+    this->setCursor(*cursor);
 }
 //! [4]
 
@@ -228,7 +229,7 @@ void TriangleWindow::render()
 
 
     QMatrix4x4 matrix;
-    matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
+    matrix.perspective(60.0f, 16.0f/9.0f, 0.0f, 10.0f);
     matrix.rotate(100.0f * n, 1, 0, 0);
     matrix.rotate(100.0f * x, 0, 0, 1);
     matrix.translate(b, a, y);
@@ -236,7 +237,6 @@ void TriangleWindow::render()
     if(direction != 0) {
         a -= (matrix.data()[0]) * 0.001f * direction;
         b += (matrix.data()[4]) * 0.001f * direction;
-
     }
 
     qDebug() << "a :" << cos(matrix.data()[0]);
