@@ -134,7 +134,7 @@ GLfloat *TriangleWindow::initVertices(GLint countX, GLint countY)
 
 float TriangleWindow::getRandomZ(float i, float j)
 {
-    return qGray(this->image.pixel(floor(this->sizeX * (i + 0.5f)), floor(this->sizeY * (j + 0.5f)))) * 0.001f;
+    return qGray(this->image.pixel(floor(this->sizeX * (i + 0.5f)), floor(this->sizeY * (j + 0.5f)))) * 0.0008f;
 }
 
 
@@ -167,7 +167,7 @@ static const char *vertexShaderSource =
         "varying lowp vec4 col;\n"
         "uniform highp mat4 matrix;\n"
         "void main() {\n"
-        "   col = vec4(vec3(1, 1, 1) * posAttr.z * 5, 1);\n"
+        "   col = vec4(vec3(1, 1, 1) * posAttr.z * 8, 1);\n"
         "   gl_Position = matrix * posAttr;\n"
         "}\n";
 
@@ -189,10 +189,6 @@ GLuint TriangleWindow::loadShader(GLenum type, const char *source)
 
 void TriangleWindow::initialize()
 {
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-
-
     m_program = new QOpenGLShaderProgram(this);
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
@@ -202,7 +198,7 @@ void TriangleWindow::initialize()
     m_matrixUniform = m_program->uniformLocation("matrix");
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-2.png");
+    this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
     this->vertices = initVertices(sizeX, sizeY);
     n = 0;
     x = 0;
@@ -212,6 +208,23 @@ void TriangleWindow::initialize()
     this->direction = 0;
     this->cursor = new QCursor(Qt::BlankCursor);
     this->setCursor(*cursor);
+
+//    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+//       GLfloat mat_shininess[] = { 50.0 };
+//       GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
+//       glClearColor (0.0, 0.0, 0.0, 0.0);
+//       glShadeModel (GL_SMOOTH);
+
+//       glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+//       glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+//       glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+//       glEnable(GL_LIGHTING);
+//       glEnable(GL_LIGHT0);
+       glEnable(GL_DEPTH_TEST);
+       glDepthFunc(GL_LESS);
+
+
 }
 //! [4]
 
@@ -223,24 +236,24 @@ void TriangleWindow::render()
     qreal retinaScale = 16.0f/9.0f;
     glViewport(-width() * 0.5f, -height() * 0.5f, width() * retinaScale, height() * retinaScale);
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_program->bind();
 
 
     QMatrix4x4 matrix;
-    matrix.perspective(60.0f, 16.0f/9.0f, 0.0f, 10.0f);
+    matrix.perspective(60.0f, 16.0f/9.0f, 0.01f, 10.0f);
     matrix.rotate(100.0f * n, 1, 0, 0);
     matrix.rotate(100.0f * x, 0, 0, 1);
-    matrix.translate(b, a, y);
 
     if(direction != 0) {
         a -= (matrix.data()[0]) * 0.001f * direction;
         b += (matrix.data()[4]) * 0.001f * direction;
     }
 
-    qDebug() << "a :" << cos(matrix.data()[0]);
-    qDebug() << "b :" << sin(matrix.data()[0]);
+    matrix.translate(b, a, - getRandomZ(a, b) - 0.02f);
+//    matrix.translate(b, a, y);
+
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
