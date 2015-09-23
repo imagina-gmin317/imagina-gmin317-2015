@@ -68,14 +68,15 @@ protected:
 private:
     GLuint loadShader(GLenum type, const char *source);
     GLfloat* initVertices(GLint countX, GLint countY);
+    float getRandomZ(float i, float j);
 
     GLuint m_posAttr;
     GLuint m_colAttr;
+    GLuint m_normalAttr;
     GLuint m_matrixUniform;
     QCursor* cursor;
 
     GLfloat* vertices;
-    float getRandomZ(float i, float j);
     QImage image;
 
     QOpenGLShaderProgram *m_program;
@@ -137,7 +138,6 @@ float TriangleWindow::getRandomZ(float i, float j)
     return qGray(this->image.pixel((this->sizeX * (i + 0.5f)), (this->sizeY * (j + 0.5f)))) * 0.0008f;
 }
 
-
 //! [1]
 
 //! [2]
@@ -166,8 +166,20 @@ static const char *vertexShaderSource =
         "attribute lowp vec4 colAttr;\n"
         "varying lowp vec4 col;\n"
         "uniform highp mat4 matrix;\n"
+        "float rand(vec2 co){ \n"
+        "return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n"
+        "}\n"
+
         "void main() {\n"
-        "   col = vec4(vec3(1, 1, 1) * posAttr.z * 8, 1);\n"
+
+        "	if(posAttr.z < 0.08 - rand(posAttr.xz) * 0.03) { \n"
+        "	  col = vec4(0 + posAttr.z, 0.4, 0, 1) * (pow((1 + posAttr.z), 3) - 0.8) * 2; \n"
+        "	} else if (posAttr.z > 0.08 - rand(posAttr.xz) * 0.03 && posAttr.z < 0.15) { \n"
+        "	  col = vec4(0.54, 0.27 + posAttr.z, 0.07, 1) * (pow((1 + posAttr.z), 3) - 1); \n"
+        "	} else if(posAttr.z > 0.15){ \n"
+        "	  col = vec4(0.9, 0.9, 0.8, 1) * (pow((1 + posAttr.z), 3) - 1); \n"
+        "	} \n"
+
         "   gl_Position = matrix * posAttr;\n"
         "}\n";
 
@@ -196,11 +208,10 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
     this->vertices = initVertices(sizeX, sizeY);
-
     n = 0;
     x = 0;
     y = -0.14f;
@@ -213,22 +224,6 @@ void TriangleWindow::initialize()
     glDepthFunc(GL_LESS);
 
     glEnable(GL_CULL_FACE);								// Ne traite pas les faces cachées
-
-//     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Active la correction de perspective (pour ombrage, texture, ...)
-
-//     GLfloat Light0Dif[4] = {1.0f, 0.37f, 0.0f, 1.0f};
-//     GLfloat Light0Spec[4] = {1.0f, 0.37f, 0.0f, 1.0f};
-//     GLfloat Light0Amb[4] = {0.5f, 0.5f, 0.5f, 1.0f};
-
-//     glLightfv(GL_LIGHT0,GL_DIFFUSE, Light0Dif);
-//     glLightfv(GL_LIGHT0,GL_SPECULAR, Light0Spec);
-//     glLightfv(GL_LIGHT0,GL_AMBIENT, Light0Amb);
-//     // GLint direction[] = {0,10,10,1};
-
-//     // glLightiv(GL_LIGHT0, GL_POSITION, direction);
-//     glEnable(GL_LIGHTING);
-//     glEnable(GL_LIGHT0);
-
 
 }
 //! [4]
@@ -257,36 +252,18 @@ void TriangleWindow::render()
     }
 
     matrix.translate(b, a, - getRandomZ(-b, -a) - 0.02f);
-//    matrix.translate(b, a, y);
-
-    qDebug() << " a = " << a;
-    qDebug() << " b = " << b;
-
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-    GLfloat colors[] = {
-        1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f,
-        1.0f, 1.0f, 0.0f
-    };
-
-    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
     glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
 
     glEnableVertexAttribArray(0);
-    //    glEnableVertexAttribArray(1);
-
     glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeX * sizeY * 2 + sizeX + 1);
-
-    //    glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
-
     m_program->release();
 
     ++m_frame;
-    GLfloat lightpos[] = {0, 0, 1., 0.};
-    glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
+
 }
 
 bool TriangleWindow::event(QEvent *event)
