@@ -134,7 +134,7 @@ GLfloat *TriangleWindow::initVertices(GLint countX, GLint countY)
 
 float TriangleWindow::getRandomZ(float i, float j)
 {
-    return qGray(this->image.pixel(floor(this->sizeX * (i + 0.5f)), floor(this->sizeY * (j + 0.5f)))) * 0.0008f;
+    return qGray(this->image.pixel((this->sizeX * (i + 0.5f)), (this->sizeY * (j + 0.5f)))) * 0.0008f;
 }
 
 
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 
     TriangleWindow window;
     window.setFormat(format);
-    window.resize(640, 480);
+    window.resize(800, 600);
     window.show();
 
     window.setAnimating(true);
@@ -196,10 +196,11 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
     this->vertices = initVertices(sizeX, sizeY);
+
     n = 0;
     x = 0;
     y = -0.14f;
@@ -208,21 +209,25 @@ void TriangleWindow::initialize()
     this->direction = 0;
     this->cursor = new QCursor(Qt::BlankCursor);
     this->setCursor(*cursor);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
-//    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-//       GLfloat mat_shininess[] = { 50.0 };
-//       GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
-//       glClearColor (0.0, 0.0, 0.0, 0.0);
-//       glShadeModel (GL_SMOOTH);
+    glEnable(GL_CULL_FACE);								// Ne traite pas les faces cachées
 
-//       glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-//       glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-//       glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+//     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Active la correction de perspective (pour ombrage, texture, ...)
 
-//       glEnable(GL_LIGHTING);
-//       glEnable(GL_LIGHT0);
-       glEnable(GL_DEPTH_TEST);
-       glDepthFunc(GL_LESS);
+//     GLfloat Light0Dif[4] = {1.0f, 0.37f, 0.0f, 1.0f};
+//     GLfloat Light0Spec[4] = {1.0f, 0.37f, 0.0f, 1.0f};
+//     GLfloat Light0Amb[4] = {0.5f, 0.5f, 0.5f, 1.0f};
+
+//     glLightfv(GL_LIGHT0,GL_DIFFUSE, Light0Dif);
+//     glLightfv(GL_LIGHT0,GL_SPECULAR, Light0Spec);
+//     glLightfv(GL_LIGHT0,GL_AMBIENT, Light0Amb);
+//     // GLint direction[] = {0,10,10,1};
+
+//     // glLightiv(GL_LIGHT0, GL_POSITION, direction);
+//     glEnable(GL_LIGHTING);
+//     glEnable(GL_LIGHT0);
 
 
 }
@@ -251,8 +256,11 @@ void TriangleWindow::render()
         b += (matrix.data()[4]) * 0.001f * direction;
     }
 
-    matrix.translate(b, a, - getRandomZ(a, b) - 0.02f);
+    matrix.translate(b, a, - getRandomZ(-b, -a) - 0.02f);
 //    matrix.translate(b, a, y);
+
+    qDebug() << " a = " << a;
+    qDebug() << " b = " << b;
 
 
     m_program->setUniformValue(m_matrixUniform, matrix);
