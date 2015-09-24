@@ -47,8 +47,7 @@
 #include <iostream>
 
 #include <QtGui/QImage>
-#include <QCursor>
-#include <QtGlobal>
+#include <QKeyEvent>
 #include <QtCore/qmath.h>
 
 //! [1]
@@ -62,7 +61,7 @@ public:
     GLfloat* generatePoints(int nb) Q_DECL_OVERRIDE;
 
 protected:
-    bool event(QEvent *event) Q_DECL_OVERRIDE;
+    bool eventFilter(QObject *obj, QEvent *event);
 
 private:
     GLuint loadShader(GLenum type, const char *source);
@@ -73,6 +72,8 @@ private:
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
+
+    int nbpoints = 240;
 
     QImage img;
 
@@ -96,7 +97,7 @@ int main(int argc, char **argv)
 
     TriangleWindow window;
     window.setFormat(format);
-    window.resize(1000, 480);
+    window.resize(1600, 900);
     window.show();
 
     window.setAnimating(true);
@@ -144,7 +145,6 @@ void TriangleWindow::initialize()
     m_matrixUniform = m_program->uniformLocation("matrix");
 
     this->img = QImage(QString("/auto_home/vbazia/Bureau/vbazia/moteur/imagina-gmin317-2015/tp1/heightmap-1.png"));
-
 }
 //! [4]
 
@@ -160,8 +160,11 @@ void TriangleWindow::render()
 
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
-    matrix.translate(this->x, this->y, this->z);
-    matrix.rotate(this->ax, this->ay, this->az, 0);
+    matrix.translate(0, -10, -10);
+
+    matrix.rotate(-10.0f, 0, 1, 0);
+    matrix.rotate(-50.0f, 1, 0, 0);
+    matrix.rotate(45.0f, 0, 0, 1);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
@@ -170,34 +173,39 @@ void TriangleWindow::render()
     //generations des points et de leurs positions
     int nbpoints = 240;
     GLfloat points[nbpoints*nbpoints*3];
-
+    //matrixe 24*24
     float interval = 0.05f;
+    //interval de distance entre les points
     float maxHeight = 10.0f;
+    //Hauteur maximal possible d'un sommet
     int cpt = 0;
     for(int i = 0; i < nbpoints; i++){
         for(int j = 0; j < nbpoints; j++){
             points[cpt++] = i * interval;
             points[cpt++] = j * interval;
             QRgb pixColor = this->img.pixel(floor(i*(this->img.width()/nbpoints)), floor(j*(this->img.height()/nbpoints)));
+            //On récupère la couleur de la heightmap au pixel voulu
             points[cpt++] = maxHeight * qGray(pixColor) / 255;
+            //On génère la hauteur selon la valeur de gris
         }
     }
 
 
-    //AFFICHAGE
+    //Affichage de mes bandes
     cpt = 0;
     bool first = false;
     int last = -1;
     int totake = 0;
-    int nbparam = 3;
-
+    int nbparam = 3; 
     for(int k = 0; k < nbpoints - 1; k++){
+        //Pour chaque bande
         last = -1;
         totake = k * nbpoints;
         first = false;
         cpt = 0;
         GLfloat vertices[nbpoints*2*nbparam];
         GLfloat colors[nbpoints*2*3];
+        //On genere les tableua de vertices et couleurs
         for(int i = 0; i < nbpoints*2; i++){
             if(last != -1){
                 if(first){
@@ -207,18 +215,36 @@ void TriangleWindow::render()
                     totake = last + nbpoints;
                     first = true;
                 }
+                //Ensuite je fais une alternance haut/bas de la bande en décalant
             }
             last = totake;
             vertices[cpt++] = points[totake*3];
             vertices[cpt++] = points[totake*3 + 1];
             vertices[cpt++] = points[totake*3 + 2];
-            colors[cpt-3] = 1.0f;
-            colors[cpt-2] = 1.0f;
-            colors[cpt-1] = 1.0f;
+            //Et je récupère les coordonnées des points pour les mettre dans les vertices
+
+            //Gestion de la couleurs de mes points selon leur hauteur.
+            if(points[totake*3 + 2] > 6){
+                //blanc
+                colors[cpt-3] = 1.0f;
+                colors[cpt-2] = 1.0f;
+                colors[cpt-1] = 1.0f;
+            }else if(points[totake*3 + 2] > 1){
+                //vert
+                colors[cpt-3] = 0.0f;
+                colors[cpt-2] = 1.0f;
+                colors[cpt-1] = 0.0f;
+            }else{
+                //bleu
+                colors[cpt-3] = 0.0f;
+                colors[cpt-2] = 0.0f;
+                colors[cpt-1] = 1.0f;
+            }
         }
         glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
         glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, nbpoints*2);
+        //J'affiche la bande
     }
 
     glEnableVertexAttribArray(0);
@@ -230,18 +256,20 @@ void TriangleWindow::render()
 }
 
 
-bool TriangleWindow::event(QEvent *event)
+bool TriangleWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    QMouseEvent *mouseEvent;
-    float deltaX = 0.5f;
-    float deltaY = 0.5f;
-
-    switch (event->type()) {
-    case QEvent::MouseMove:
-        mouseEvent = static_cast<QMouseEvent*>(event);
-        this->ax -= (deltaX - mouseEvent->x()) * 0.001f;
-        this->ay -= (deltaY - mouseEvent->y()) * 0.001f;
-        return true;
+    if(event->type() == QEvent::KeyRelease)
+    {
+        // Appelle ton signal puis :
+        QKeyEvent *c = dynamic_cast<QKeyEvent *>(event);
+        if(c && c->key() == Qt::Key_Space)
+        {
+            qDebug()<<"lol";
+        }
+        if(c && c->key() == Qt::Key_Escape)
+        {
+            QCoreApplication::exit(0);
+        }
     }
-    OpenGLWindow::event(event);
+    return false;
 }
