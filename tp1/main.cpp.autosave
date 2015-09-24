@@ -226,7 +226,7 @@ void TriangleWindow::render()
     ///pour cette fonction il faut mettre la macro NB_SQUARE_PER_LINE a 239 carre par ligne (donc 240 sommet par ligne)
     ///il faut aussi mettre le chemin absolue vers l'image de la height map
 
-    generate_heighmap("tp1/heightmap-1.png");
+    generate_heighmap("C:/Users/Bastien/Desktop/Workspace_QT/imagina-gmin317-2015/tp1/heightmap-1.png");
 
     m_program->release();
 
