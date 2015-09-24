@@ -7,7 +7,7 @@ Tous les étudiants sont invités à créer leur propre version de chaque sous-p
 - tous les tp sont à rendre une semaine après la séance
 - les études documentaires sont à rendre le 5 décembre 2015
 - les mini-projets sont à rendre le 10 janvier 2016
-- 
+
 
 La fonction generatePoint() prend en parametre la taille de la grille de point que l'on veut generer. Elle retourne un tableau de flottant comportant 3 case par point (pour les coordoonées x,y,z).
 
