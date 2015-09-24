@@ -46,6 +46,9 @@
 #include <QtGui/QScreen>
 #include <iostream>
 
+#include <QtGui/QImage>
+#include <QCursor>
+#include <QtGlobal>
 #include <QtCore/qmath.h>
 
 //! [1]
@@ -58,6 +61,9 @@ public:
     void render() Q_DECL_OVERRIDE;
     GLfloat* generatePoints(int nb) Q_DECL_OVERRIDE;
 
+protected:
+    bool event(QEvent *event) Q_DECL_OVERRIDE;
+
 private:
     GLuint loadShader(GLenum type, const char *source);
 
@@ -67,6 +73,10 @@ private:
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
+
+    QImage img;
+
+    float x, y, z, ax, ay, az = 0.0f;
 };
 
 TriangleWindow::TriangleWindow()
@@ -132,6 +142,9 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
+
+    this->img = QImage(QString("/auto_home/vbazia/Bureau/vbazia/moteur/imagina-gmin317-2015/tp1/heightmap-1.png"));
+
 }
 //! [4]
 
@@ -147,60 +160,69 @@ void TriangleWindow::render()
 
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
-    matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+    matrix.translate(this->x, this->y, this->z);
+    matrix.rotate(this->ax, this->ay, this->az, 0);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-    int nbpoints = 4;
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    GLfloat *points = generatePoints(nbpoints);
+    //generations des points et de leurs positions
+    int nbpoints = 240;
+    GLfloat points[nbpoints*nbpoints*3];
 
+    float interval = 0.05f;
+    float maxHeight = 10.0f;
     int cpt = 0;
-    bool first = false;
-    int last = -1;
-    int combien = 6;
-    int totake = 0;
-
-    GLfloat vertices[combien*2];
-
-    for(int i = 0; i < combien; i++){
-        if(last != -1){
-            if(first){
-                totake = last - nbpoints + 1;
-                first = false;
-            }else{
-                totake = last + nbpoints;
-                first = true;
-            }
+    for(int i = 0; i < nbpoints; i++){
+        for(int j = 0; j < nbpoints; j++){
+            points[cpt++] = i * interval;
+            points[cpt++] = j * interval;
+            QRgb pixColor = this->img.pixel(floor(i*(this->img.width()/nbpoints)), floor(j*(this->img.height()/nbpoints)));
+            points[cpt++] = maxHeight * qGray(pixColor) / 255;
         }
-        qDebug()<<totake;
-        last = totake;
-        vertices[cpt++] = points[totake*3];
-        vertices[cpt++] = points[totake*3 + 1];
-       // vertices[cpt++] = points[totake*3 + 2];
     }
 
 
+    //AFFICHAGE
+    cpt = 0;
+    bool first = false;
+    int last = -1;
+    int totake = 0;
+    int nbparam = 3;
 
-    GLfloat colors[] = {
-        1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 1.0f
-    };
-
-
-
-    glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+    for(int k = 0; k < nbpoints - 1; k++){
+        last = -1;
+        totake = k * nbpoints;
+        first = false;
+        cpt = 0;
+        GLfloat vertices[nbpoints*2*nbparam];
+        GLfloat colors[nbpoints*2*3];
+        for(int i = 0; i < nbpoints*2; i++){
+            if(last != -1){
+                if(first){
+                    totake = last - nbpoints + 1;
+                    first = false;
+                }else{
+                    totake = last + nbpoints;
+                    first = true;
+                }
+            }
+            last = totake;
+            vertices[cpt++] = points[totake*3];
+            vertices[cpt++] = points[totake*3 + 1];
+            vertices[cpt++] = points[totake*3 + 2];
+            colors[cpt-3] = 1.0f;
+            colors[cpt-2] = 1.0f;
+            colors[cpt-1] = 1.0f;
+        }
+        glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+        glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, nbpoints*2);
+    }
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, combien);
-
-    glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(0);
 
     m_program->release();
 
@@ -208,19 +230,18 @@ void TriangleWindow::render()
 }
 
 
-GLfloat* TriangleWindow::generatePoints(int nb){
-    GLfloat points[nb*nb*3];
+bool TriangleWindow::event(QEvent *event)
+{
+    QMouseEvent *mouseEvent;
+    float deltaX = 0.5f;
+    float deltaY = 0.5f;
 
-    float interval = 0.2f;
-
-    int cpt = 0;
-    for(int i = 0; i < nb; i++){
-        for(int j = 0; j < nb; j++){
-            points[cpt++] = i * interval;
-            points[cpt++] = j * interval;
-            points[cpt++] = 0.0f;
-
-        }
+    switch (event->type()) {
+    case QEvent::MouseMove:
+        mouseEvent = static_cast<QMouseEvent*>(event);
+        this->ax -= (deltaX - mouseEvent->x()) * 0.001f;
+        this->ay -= (deltaY - mouseEvent->y()) * 0.001f;
+        return true;
     }
-    return points;
+    OpenGLWindow::event(event);
 }
