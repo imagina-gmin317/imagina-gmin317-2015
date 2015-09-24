@@ -183,25 +183,30 @@ void TriangleWindow::render()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     GLfloat vertices[] = {
-        0.0f, 0.0f,
-        0.0f, 0.2f,
-        0.2f, 0.0f,
-        0.2f, 0.2f,
-        0.4f, 0.0f,
-        0.4f, 0.2f
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.2f, 0.0f,
+        0.2f, 0.0f, 0.0f,
+        0.2f, 0.2f, 0.0f,
+        0.4f, 0.0f, 0.0f,
+        0.4f, 0.2f, 0.0f,
+        0.4f, 0.4f, 0.0f,
+        0.2f, 0.2f, 0.0f,
+        0.2f, 0.4f, 0.0f,
+        0.0f, 0.2f, 0.0f,
+        0.0f, 0.4f, 0.0f
     };
 
     GLfloat colors[] = {
         1.0f, 1.0f, 1.0f
     };
 
-    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, getPoints());
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
     glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, getColors());
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 16*16);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 11);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
