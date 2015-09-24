@@ -246,8 +246,8 @@ void TriangleWindow::render()
     matrix.rotate(100.0f * zAngle, 0, 0, 1);
 
     if(direction != 0) {
-        y -= (matrix.data()[0]) * 0.001f * direction;
         x += (matrix.data()[4]) * 0.001f * direction;
+        y -= (matrix.data()[0]) * 0.001f * direction;
     }
 
     matrix.translate(x, y, - getRandomZ(-x, -y) - 0.02f);
@@ -298,7 +298,10 @@ bool TriangleWindow::event(QEvent *event)
 
         return true;
     case QEvent::KeyRelease:
-        direction = 0;
+        keyEvent = static_cast<QKeyEvent*>(event);
+        if(keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down) {
+            direction = 0;
+        }
         return true;
     }
     OpenGLWindow::event(event);
