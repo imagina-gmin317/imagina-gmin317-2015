@@ -61,7 +61,7 @@ private:
 
     GLfloat *getSurface(int nbPoint);
     GLfloat *generatePoint(int nbPoint);
-    void addPoint(GLfloat* vert,GLfloat *vertice, int ligne, int colonne);
+    GLfloat* addPoint(GLfloat* vert,int sizeVert,GLfloat *vertice, int ligne, int colonne, int nbPoint);
 
     GLuint m_posAttr;
     GLuint m_colAttr;
@@ -153,16 +153,19 @@ void TriangleWindow::render()
     matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-   /* GLfloat vertices[] = {
+   /*GLfloat vertices[] = {
         0.0f, 0.0f,
-        1.0f, 0.0f,
         0.0f, 1.0f,
-        1.0f,1.0f
+        1.0f, 0.0f,
+        1.0f,1.0f,
+        1.5f,0.0f,
+        1.5f,1.0f,
+        1.5f,1.5f,
+       1.0f,1.5f
+
 
     };*/
-
     GLfloat *vertices = getSurface(16);
-
     GLfloat colors[] = {
         1.0f, 0.0f, 1.0f,
         1.0f, 1.0f, 0.0f,
@@ -191,17 +194,42 @@ void TriangleWindow::render()
  * organise les points passés en paramètre pour la création des triangles de la surface
  */
 GLfloat* TriangleWindow::getSurface(int nbPoint){
-    GLfloat *vertices;
+    GLfloat *vertices = generatePoint(nbPoint);
     GLfloat *vert;//les points organisés
-    vertices = generatePoint(nbPoint);
+    int sizeVert =0;
+    bool b = true; // permet de changer le sens de parcours des points
     for(int i =0;i<nbPoint;i++){
         for(int j=0;j<nbPoint;j++){
-            addPoint(vert,vertices,i,j);
-            addPoint(vert,vertices,i+1,j);
-            addPoint(vert,vertices,i+1,j+1);
-            addPoint(vert,vertices,i,j);
-            addPoint(vert,vertices,i,j+1);
-            addPoint(vert,vertices,i+1,j+1);
+            if(b){
+                vert = addPoint(vert,sizeVert,vertices,i,j,nbPoint);
+                sizeVert++;
+                vert = addPoint(vert,sizeVert,vertices,i+1,j,nbPoint);
+                sizeVert++;
+            }else{
+                vert = addPoint(vert,sizeVert,vertices,i,nbPoint-j,nbPoint);
+                sizeVert++;
+                vert = addPoint(vert,sizeVert,vertices,i+1,nbPoint-j,nbPoint);
+                sizeVert++;
+            }
+
+
+            /*vert = addPoint(vert,sizeVert,vertices,i,j,nbPoint);
+            sizeVert++;
+            vert = addPoint(vert,sizeVert,vertices,i+1,j,nbPoint);
+            sizeVert++;
+            vert =  addPoint(vert,sizeVert,vertices,i,j+1,nbPoint);
+            sizeVert++;
+            vert = addPoint(vert,sizeVert,vertices,i+1,j+1,nbPoint);
+            sizeVert++;
+            vert = addPoint(vert,sizeVert,vertices,i,j+1,nbPoint);
+            sizeVert++;
+            vert = addPoint(vert,sizeVert,vertices,i+1,j+1,nbPoint);
+            sizeVert++;*/
+        }
+        if(b){
+            b=false;
+        }else{
+            b = true;
         }
     }
 
@@ -214,7 +242,7 @@ GLfloat* TriangleWindow::getSurface(int nbPoint){
  * @return un tableau de nbPoint*nbPoint pour créer une surface (dans getSurface)
  */
 GLfloat* TriangleWindow::generatePoint(int nbPoint){
-    GLfloat point[nbPoint*nbPoint*3];
+    GLfloat *point = new GLfloat[nbPoint*nbPoint*3];
     float stepX = 1.0f / (float)(nbPoint-1);
     float stepY = 1.0f / (float)(nbPoint-1);
     float x = 0.0f;
@@ -240,14 +268,18 @@ GLfloat* TriangleWindow::generatePoint(int nbPoint){
  * @param nbPoint
  * ajoute le point de la ligne "ligne" et de la colonne "colonne" à vert
  */
-void TriangleWindow::addPoint(GLfloat *vert, GLfloat *vertice, int ligne, int colonne){
-    int size = (sizeof(vert)/sizeof(GLfloat));
-    GLfloat temp[size+1];
-    for(int i = 0;i<size;i++){
+GLfloat* TriangleWindow::addPoint(GLfloat *vert, int sizeVert, GLfloat *vertice, int ligne, int colonne, int nbPoint){
+    GLfloat *temp= new GLfloat[sizeVert*3+3];
+    for(int i = 0;i<sizeVert*3;i++){
         temp[i] = vert[i];
     }
-    temp[size+1]=vertice[ligne+colonne];
+
+    temp[sizeVert+1]=vertice[ligne*nbPoint*3+colonne+1];//x
+    temp[sizeVert+2]=vertice[ligne*nbPoint*3+colonne+2];//y
+    temp[sizeVert+3]=vertice[ligne*nbPoint*3+colonne+3];//z
     vert = temp;
+    delete[] temp;
+    return temp;
 }
 
 //! [5]
