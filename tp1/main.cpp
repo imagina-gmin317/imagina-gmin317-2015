@@ -75,13 +75,13 @@ private:
     GLuint m_normalAttr;
     GLuint m_matrixUniform;
     QCursor* cursor;
-
     GLfloat* vertices;
     QImage image;
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
-    float n, x, y, a, b;
+    bool fill;
+    float xAngle, zAngle, y, x;
     int direction;
 };
 
@@ -208,22 +208,20 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
     this->vertices = initVertices(sizeX, sizeY);
-    n = 0;
+    xAngle = 0;
+    zAngle = 0;
+    y = 0;
     x = 0;
-    y = -0.14f;
-    a = 0;
-    b = 0;
     this->direction = 0;
     this->cursor = new QCursor(Qt::BlankCursor);
     this->setCursor(*cursor);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-    glEnable(GL_CULL_FACE);								// Ne traite pas les faces cachées
+    glEnable(GL_CULL_FACE);
 
 }
 //! [4]
@@ -241,17 +239,18 @@ void TriangleWindow::render()
     m_program->bind();
 
 
+
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/9.0f, 0.01f, 10.0f);
-    matrix.rotate(100.0f * n, 1, 0, 0);
-    matrix.rotate(100.0f * x, 0, 0, 1);
+    matrix.rotate(100.0f * xAngle, 1, 0, 0);
+    matrix.rotate(100.0f * zAngle, 0, 0, 1);
 
     if(direction != 0) {
-        a -= (matrix.data()[0]) * 0.001f * direction;
-        b += (matrix.data()[4]) * 0.001f * direction;
+        y -= (matrix.data()[0]) * 0.001f * direction;
+        x += (matrix.data()[4]) * 0.001f * direction;
     }
 
-    matrix.translate(b, a, - getRandomZ(-b, -a) - 0.02f);
+    matrix.translate(x, y, - getRandomZ(-x, -y) - 0.02f);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
@@ -276,16 +275,19 @@ bool TriangleWindow::event(QEvent *event)
     switch (event->type()) {
     case QEvent::MouseMove:
         mouseEvent = static_cast<QMouseEvent*>(event);
-        this->x -= (deltaX - mouseEvent->x()) * 0.001f;
-        this->n -= (deltaY - mouseEvent->y()) * 0.001f;
+        this->zAngle -= (deltaX - mouseEvent->x()) * 0.001f;
+        this->xAngle -= (deltaY - mouseEvent->y()) * 0.001f;
         return true;
     case QEvent::KeyPress:
         keyEvent = static_cast<QKeyEvent*>(event);
 
         if(keyEvent->key() == Qt::Key_Space) {
-            y += 0.01f;
-        } else if(keyEvent->key() == Qt::Key_Shift) {
-            y -= 0.01f;
+            if(fill) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            } else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            fill = !fill;
         } else if(keyEvent->key() == Qt::Key_Up) {
             direction = 1;
         } else if(keyEvent->key() == Qt::Key_Down) {
