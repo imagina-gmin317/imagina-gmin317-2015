@@ -47,11 +47,15 @@
 
 #include <QtCore/qmath.h>
 
-//! [1]
 class TriangleWindow : public OpenGLWindow
 {
 public:
     TriangleWindow();
+
+    static const int tailleX = 240;
+    static const int tailleY = 240;
+
+    QImage relief = QImage("/home/thibaut/Dropbox/imagina-gmin317-2015/tp1/heightmap-1.png");
 
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
@@ -65,6 +69,9 @@ private:
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
+    GLfloat getZ(GLfloat i, GLfloat j);
+    GLfloat *getColors(GLint x, GLint y);
+    GLfloat *getPoints(GLint x, GLint y);
 };
 
 TriangleWindow::TriangleWindow()
@@ -72,9 +79,6 @@ TriangleWindow::TriangleWindow()
     , m_frame(0)
 {
 }
-//! [1]
-
-//! [2]
 int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
@@ -91,10 +95,7 @@ int main(int argc, char **argv)
 
     return app.exec();
 }
-//! [2]
 
-
-//! [3]
 static const char *vertexShaderSource =
     "attribute highp vec4 posAttr;\n"
     "attribute lowp vec4 colAttr;\n"
@@ -113,16 +114,14 @@ static const char *fragmentShaderSource =
 //! [3]
 
 //! [4]
-GLuint TriangleWindow::loadShader(GLenum type, const char *source)
-{
+GLuint TriangleWindow::loadShader(GLenum type, const char *source){
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, 0);
     glCompileShader(shader);
     return shader;
 }
 
-void TriangleWindow::initialize()
-{
+void TriangleWindow::initialize(){
     m_program = new QOpenGLShaderProgram(this);
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
@@ -131,35 +130,51 @@ void TriangleWindow::initialize()
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
 }
-//! [4]
 
-//! [5]
+GLfloat TriangleWindow::getZ(GLfloat i, GLfloat j){
+    return qGray(this->relief.pixel((this->tailleX * (i+0.5f)), (this->tailleY * (j+0.5f)))) * 0.0008f;
+}
 
-
-GLfloat *getColors(){
-    GLfloat *couleurs= new GLfloat[16*16*3];
-    for(int i = 0;i<(16*16*3);i++){
+GLfloat *TriangleWindow::getColors(GLint x, GLint y){
+    GLint nb = x * y * 3 * 2 + x * 3 + 3;
+    GLfloat *couleurs= new GLfloat[nb];
+    for(GLint i = 0;i<(nb);i++){
         couleurs[i] = 1.0f;
     }
+
     return couleurs;
 }
 
+GLfloat *TriangleWindow::getPoints(GLint x, GLint y){
+    GLint nb = x * y * 3 * 2 + x * 3 + 3;
+    GLfloat *points = new GLfloat[nb];
+    GLfloat stepX = 1.0f / (x);
+    GLfloat stepY = 1.0f / (y);
+    GLint cpt = 0;
+    GLint k = 1;
+    GLfloat posX = -0.5f;
+    GLfloat posY = -0.5f;
 
-GLfloat *getPoints(){
-    GLfloat *points= new GLfloat[16*16*6];
-    int i=-1;
-    for(float ligne=0.0f; ligne <1.6f;ligne+=0.1f){
-        for(float colonne = -0.8f; colonne<0.8f;colonne+=0.1f){
-            //qDebug() << "colonne:" << colonne << " ligne:" << ligne;
-            //qDebug()<< i << " ";
-            points[i++] = colonne;
-            points[i++] = 0.0f;
-            points[i++] = 0.8f-ligne+0.1f;
-            points[i++] = colonne;
-            points[i++] = 0.0f;
-            points[i++] = 0.8f-ligne;
+    for (GLint i = 0; i < x; ++i) {
+        for (GLint j = 0; j < y; ++j) {
+            points[cpt++] = posX;
+            points[cpt++] = getZ(posX, posY);
+            points[cpt++] = posY;
+            points[cpt++] = posX + stepX;
+            points[cpt++] = getZ(posX + stepX, posY);
+            points[cpt++] = posY;
+            posY += stepY * k;
         }
+        points[cpt++] = posX;
+        points[cpt++] = getZ(posX, posY);
+        points[cpt++] = posY;
+        k *= -1;
+        posX += stepX;
     }
+    points[cpt++] = posX;
+    points[cpt++] = getZ(posX, posY);
+    points[cpt++] = posY;
+
     return points;
 }
 
@@ -175,14 +190,15 @@ void TriangleWindow::render()
 
     QMatrix4x4 matrix;
     matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
-    matrix.translate(0, 0, -2);
+    matrix.translate(0, -0.13f, -0.6f);
     matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    GLfloat vertices[] = {
+    /*
+    GLfloat vertices[] = { //dessine un carré 3x3, avec 11 coordonnées
         0.0f, 0.0f, 0.0f,
         0.0f, 0.2f, 0.0f,
         0.2f, 0.0f, 0.0f,
@@ -199,14 +215,15 @@ void TriangleWindow::render()
     GLfloat colors[] = {
         1.0f, 1.0f, 1.0f
     };
+    */
 
-    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, getColors());
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, getPoints(tailleX, tailleY));
+    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, getColors(tailleX, tailleY));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 11);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, tailleX*tailleY*2+tailleX+1);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
