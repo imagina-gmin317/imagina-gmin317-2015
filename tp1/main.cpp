@@ -46,6 +46,11 @@
 #include <QtGui/QScreen>
 
 #include <QtCore/qmath.h>
+#include <QCursor>
+#include <QtGlobal>
+
+#include <time.h>
+#include <vector>
 
 //! [1]
 class TriangleWindow : public OpenGLWindow
@@ -55,17 +60,27 @@ public:
 
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
+   // bool event(QEvent* event)Q_DECL_OVERRIDE;
 
 private:
+
     GLuint loadShader(GLenum type, const char *source);
 
-    GLfloat *getSurface(int nbPoint);
+    GLfloat *getSurface(int nbPoint, GLfloat* points);
     GLfloat *generatePoint(int nbPoint);
-    GLfloat* addPoint(GLfloat* vert,int sizeVert,GLfloat *vertice, int ligne, int colonne, int nbPoint);
+
 
     GLuint m_posAttr;
     GLuint m_colAttr;
     GLuint m_matrixUniform;
+    GLfloat *vertices;
+    int direction =0; // direction de la camera (0:vers l'avant, -1:vers l'arrière)
+
+    QCursor* curs;
+
+    /* Coordonnées de la caméra */
+    float posX = 0;
+    float posY = 0;
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
@@ -134,12 +149,25 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
+    vertices = generatePoint(16);
+    //this->curs = new QCursor(Qt::BlankCursor);
+    this->posX=0;
+    this->posY=0;
+
+    glDepthFunc(GL_LESS);
+
+    glEnable(GL_CULL_FACE);
+
+
 }
 //! [4]
 
 //! [5]
 void TriangleWindow::render()
 {
+
+    //this->curs->setPos(this->position().x() + width() * 0.5f, this->position().y() + height() * 0.5f);
+
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
 
@@ -165,20 +193,20 @@ void TriangleWindow::render()
 
 
     };*/
-    GLfloat *vertices = getSurface(16);
+    GLfloat *vertices = getSurface(16,this->vertices);
     GLfloat colors[] = {
         1.0f, 0.0f, 1.0f,
         1.0f, 1.0f, 0.0f,
         0.0f, 1.0f, 1.0f
     };
 
-    glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
     glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 16*16);
+    glDrawArrays(GL_LINE_STRIP, 0, 16*16);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
@@ -193,47 +221,42 @@ void TriangleWindow::render()
  * @return tableau de nbPoint*nbPoint points à 3 paramètres, représentant une surface
  * organise les points passés en paramètre pour la création des triangles de la surface
  */
-GLfloat* TriangleWindow::getSurface(int nbPoint){
-    GLfloat *vertices = generatePoint(nbPoint);
-    GLfloat *vert;//les points organisés
-    int sizeVert =0;
+GLfloat* TriangleWindow::getSurface(int nbPoint, GLfloat* points){
+    GLfloat *vertices = points;
+    //GLfloat *vert;//les points organisés
+    std::vector<GLfloat> vert;
     bool b = true; // permet de changer le sens de parcours des points
     for(int i =0;i<nbPoint;i++){
         for(int j=0;j<nbPoint;j++){
-            if(b){
-                vert = addPoint(vert,sizeVert,vertices,i,j,nbPoint);
-                sizeVert++;
-                vert = addPoint(vert,sizeVert,vertices,i+1,j,nbPoint);
-                sizeVert++;
-            }else{
-                vert = addPoint(vert,sizeVert,vertices,i,nbPoint-j,nbPoint);
-                sizeVert++;
-                vert = addPoint(vert,sizeVert,vertices,i+1,nbPoint-j,nbPoint);
-                sizeVert++;
+            if(b){// de gauche à droite
+                vert.push_back(vertices[i*nbPoint*3+j]);//x
+                vert.push_back(vertices[i*nbPoint*3+j+1]);//y
+                vert.push_back(vertices[i*nbPoint*3+j+2]);//z
+
+                vert.push_back(vertices[(i+1)*nbPoint*3+j]);//x
+                vert.push_back(vertices[(i+1)*nbPoint*3+j+1]);//y
+                vert.push_back(vertices[(i+1)*nbPoint*3+j+2]);//z
+            }else{// de droite à gauche
+                vert.push_back(vertices[i*nbPoint*3+nbPoint-j]);//x
+                vert.push_back(vertices[i*nbPoint*3+nbPoint-j+1]);//y
+                vert.push_back(vertices[i*nbPoint*3+nbPoint-j+2]);//z
+
+                vert.push_back(vertices[(i+1)*nbPoint*3+nbPoint-j]);//x
+                vert.push_back(vertices[(i+1)*nbPoint*3+nbPoint-j+1]);//y
+                vert.push_back(vertices[(i+1)*nbPoint*3+nbPoint-j+2]);//z
             }
 
-
-            /*vert = addPoint(vert,sizeVert,vertices,i,j,nbPoint);
-            sizeVert++;
-            vert = addPoint(vert,sizeVert,vertices,i+1,j,nbPoint);
-            sizeVert++;
-            vert =  addPoint(vert,sizeVert,vertices,i,j+1,nbPoint);
-            sizeVert++;
-            vert = addPoint(vert,sizeVert,vertices,i+1,j+1,nbPoint);
-            sizeVert++;
-            vert = addPoint(vert,sizeVert,vertices,i,j+1,nbPoint);
-            sizeVert++;
-            vert = addPoint(vert,sizeVert,vertices,i+1,j+1,nbPoint);
-            sizeVert++;*/
         }
         if(b){
             b=false;
-        }else{
-            b = true;
         }
     }
+    GLfloat *tabVertices = new GLfloat[vert.size()];
+    for(int i=0;i<vert.size();i++){
+        tabVertices[i]=vert.at(i);
+    }
 
-    return vert;
+    return tabVertices;
 }
 
 /**
@@ -252,6 +275,7 @@ GLfloat* TriangleWindow::generatePoint(int nbPoint){
     for(int i=0;i<nbPoint;i++){
         x = 0.0f;
         for(int j=0;j<nbPoint;j++){
+            z = rand() % 2;
             point[cpt++]=x;
             point[cpt++]=y;
             point[cpt++]=z;
@@ -261,25 +285,28 @@ GLfloat* TriangleWindow::generatePoint(int nbPoint){
     }
     return point;
 }
-/**
- * @brief TriangleWindow::addPoint
- * @param vert
- * @param vertice
- * @param nbPoint
- * ajoute le point de la ligne "ligne" et de la colonne "colonne" à vert
- */
-GLfloat* TriangleWindow::addPoint(GLfloat *vert, int sizeVert, GLfloat *vertice, int ligne, int colonne, int nbPoint){
-    GLfloat *temp= new GLfloat[sizeVert*3+3];
-    for(int i = 0;i<sizeVert*3;i++){
-        temp[i] = vert[i];
-    }
 
-    temp[sizeVert+1]=vertice[ligne*nbPoint*3+colonne+1];//x
-    temp[sizeVert+2]=vertice[ligne*nbPoint*3+colonne+2];//y
-    temp[sizeVert+3]=vertice[ligne*nbPoint*3+colonne+3];//z
-    vert = temp;
-    delete[] temp;
-    return temp;
-}
+
+/*bool TriangleWindow::event(QEvent* event){
+    QMouseEvent* mouse;
+    QKeyEvent* key;
+
+    switch(event->type()){
+    case QEvent::KeyPress :
+        key = static_cast<QKeyEvent*>(event);
+        if(key->key() == Qt::Key_Up){
+            //direction = 0;
+            qDebug()<<"chouette";
+        }else if(key->key()==Qt::Key_Down){
+            direction = -1;
+        }else if (key->key()== 'q'){
+            qApp->exit;
+        }
+    }
+    return true;
+
+    OpenGLWindow::event(event);
+}*/
+
 
 //! [5]
