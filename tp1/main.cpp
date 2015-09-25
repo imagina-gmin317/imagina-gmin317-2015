@@ -55,8 +55,8 @@ class TriangleWindow : public OpenGLWindow
 {
 public:
     TriangleWindow();
-    static const int sizeX = 240;
-    static const int sizeY = 240;
+     int sizeX;
+     int sizeY;
 
 
     void initialize() Q_DECL_OVERRIDE;
@@ -210,6 +210,8 @@ void TriangleWindow::initialize()
     m_matrixUniform = m_program->uniformLocation("matrix");
 
     this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
+    this->sizeX = this->image.width();
+    this->sizeY = this->image.height();
     this->vertices = initVertices(sizeX, sizeY);
     xAngle = 0;
     zAngle = 0;
@@ -241,7 +243,7 @@ void TriangleWindow::render()
 
 
     QMatrix4x4 matrix;
-    matrix.perspective(60.0f, 16.0f/9.0f, 0.01f, 10.0f);
+    matrix.perspective(60.0f, 16.0f/9.0f, 0.01f, 1.0f);
     matrix.rotate(100.0f * xAngle, 1, 0, 0);
     matrix.rotate(100.0f * zAngle, 0, 0, 1);
 
