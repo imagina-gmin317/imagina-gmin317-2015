@@ -45,6 +45,7 @@
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLPaintDevice>
 #include <QtGui/QPainter>
+#include <QKeyEvent>
 
 //! [1]
 OpenGLWindow::OpenGLWindow(QWindow *parent)
@@ -53,6 +54,17 @@ OpenGLWindow::OpenGLWindow(QWindow *parent)
     , m_animating(false)
     , m_context(0)
     , m_device(0)
+    , m_x(0.0f) // DEPLACEMENT SUR L'AXE X
+    , m_y(0.0f) // DEPLACEMENT SUR L'AXE Y
+    , m_z(-350.0f) // DEPLACEMENT SUR L'AXE Z
+    , m_drawn(false) // VARIABLE POUR NE PLUS RECHARGER LE TABLEAU DE POINT
+    , m_mode(GL_LINE_LOOP) // MODE POUR CHOISIR SI ON AFFICHE LES TRIANGLES EN STRIP OU BIEN EN FIL DE FER
+    , m_xrotation(0.0f) // VARIABLE POUR LA ROTATION
+    , m_zrotation(0.0f)
+    , m_axe(0) // VARIABLE POUR CHOISIR L'AXE DE ROTATION
+    , m_xmouse(0)
+    , m_ymouse(0)
+    , m_mouseButtonPressed(false)
 {
     setSurfaceType(QWindow::OpenGLSurface);
 }
@@ -102,6 +114,104 @@ bool OpenGLWindow::event(QEvent *event)
         m_update_pending = false;
         renderNow();
         return true;
+    case QEvent::MouseMove:
+    {
+        QMouseEvent *MouseEvent = (QMouseEvent*)event;
+
+        if(!m_mouseButtonPressed)
+        {
+            m_xmouse = MouseEvent->x();
+            m_ymouse = MouseEvent->y();
+        }
+
+        if(MouseEvent->buttons() & Qt::LeftButton)
+        {
+            m_mouseButtonPressed = true;
+
+            if(MouseEvent->x() > m_xmouse)
+                m_zrotation += 5.0f;
+            else
+                m_zrotation -= 5.0f;
+
+            m_axe = 0;
+
+            m_xmouse = MouseEvent->x();
+
+            renderNow();
+        }
+        else if(MouseEvent->buttons() & Qt::RightButton)
+        {
+            m_mouseButtonPressed = true;
+
+            if(MouseEvent->y() > m_ymouse)
+                m_xrotation += 5.0f;
+            else
+                m_xrotation -= 5.0f;
+
+            m_axe = 1;
+
+            m_ymouse = MouseEvent->y();
+
+            renderNow();
+        }
+        else
+        {
+            m_mouseButtonPressed = false;
+        }
+        return true;
+    }
+    case QEvent::Wheel:
+    {
+        QWheelEvent *WheelEvent = (QWheelEvent*)event;
+        if(WheelEvent->delta() > 0)
+        {
+            m_z += 10.0f;
+        }
+        else
+        {
+            m_z -= 10.0f;
+        }
+        renderNow();
+        return true;
+    }
+    case QEvent::KeyPress:
+    {
+        QKeyEvent *KeyEvent = (QKeyEvent*)event;
+        int key = KeyEvent->key();
+
+        switch(key) {
+            case Qt::Key_E :
+                m_y += 5.0f;
+                break;
+            case Qt::Key_S :
+                m_x -= 5.0f;
+                break;
+            case Qt::Key_D :
+                m_y -= 5.0f;
+                break;
+            case Qt::Key_F :
+                m_x += 5.0f;
+                break;
+            case Qt::Key_Up :
+                m_z += 2.0f;
+                break;
+            case Qt::Key_Down :
+                m_z -= 2.0f;
+                break;
+            case Qt::Key_1 :
+                m_mode = GL_TRIANGLE_STRIP;
+                break;
+            case Qt::Key_2 :
+                m_mode = GL_LINE_LOOP;
+                break;
+
+            default:
+                return true;
+        }
+
+        renderNow();
+        return true;
+    }
     default:
         return QWindow::event(event);
     }

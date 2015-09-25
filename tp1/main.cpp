@@ -46,6 +46,16 @@
 #include <QtGui/QScreen>
 
 #include <QtCore/qmath.h>
+#include <stdlib.h>
+#include <time.h>
+#include <QMouseEvent>
+#include <iostream>
+
+using namespace std;
+
+#define nbSommets 240
+GLfloat points[nbSommets*nbSommets*3];
+//GLfloat color[nbSommets*nbSommets*3];
 
 //! [1]
 class TriangleWindow : public OpenGLWindow
@@ -65,6 +75,7 @@ private:
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
+
 };
 
 TriangleWindow::TriangleWindow()
@@ -87,7 +98,7 @@ int main(int argc, char **argv)
     window.resize(640, 480);
     window.show();
 
-    window.setAnimating(true);
+    //window.setAnimating(true);
 
     return app.exec();
 }
@@ -130,12 +141,20 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
+
+    glEnable(GL_FOG);
+    glClearColor(0.0f, 0.0f, 0.0f, 1);
+    //glEnable( GL_LIGHTING );
+
 }
 //! [4]
 
 //! [5]
 void TriangleWindow::render()
 {
+    QImage image ("C:/Users/Galaks/Desktop/tp1_Moteur/tp1/heightmap-1.png");
+
+
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
 
@@ -144,37 +163,123 @@ void TriangleWindow::render()
     m_program->bind();
 
     QMatrix4x4 matrix;
-    matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
-    matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+    matrix.perspective(60.0f, 4.0f/3.0f, 0.1f, 1000.0f);
+    matrix.translate(m_x, m_y, m_z);
+
+
+    matrix.rotate(m_xrotation, 1, 0, 0);
+    matrix.rotate(m_zrotation, 0, 0, 1);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-    GLfloat vertices[] = {
-        0.0f, 0.707f,
-        -0.5f, -0.5f,
-        0.5f, -0.5f
-    };
+    GLfloat x = 0.0f;
+    GLfloat y = (float)nbSommets/2.0f;
+    GLfloat z = 0.0f;
 
-    GLfloat colors[] = {
-        1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 1.0f
-    };
+    GLfloat sommets[nbSommets*2*3];
+    GLfloat color[nbSommets*2*3];
 
-    glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
 
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+    if(!m_drawn)
+    {
+        srand(time(NULL));
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+        int indice = 0;
+        for(int i = 0; i < nbSommets; ++i)
+        {
+            x = -((float)nbSommets/2.0f);
+            for(int j = 0; j < nbSommets; ++j)
+            {
+                points[indice] = x;
+                points[indice+1] = y;
 
-    glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(0);
+                z = qGray(image.pixel(i, j)) / 10;
+
+                points[indice+2] = z;
+                indice += 3;
+
+                x += 1.0f;
+
+            }
+            y -= 1.0f;
+        }
+
+        m_drawn = true;
+    }
+
+    int k = 0;
+
+    for(int cpt = 0; cpt < nbSommets-1; ++cpt)
+    {
+        int j = 0;
+        k = cpt * nbSommets * 3;
+
+        for(int i = 0; i < (nbSommets)*2*3; i += 3)
+        {
+
+            sommets[i] = points[k];
+            sommets[i+1] = points[k+1];
+            sommets[i+2] = points[k+2];
+
+            if(points[k+2] > 12)
+            {
+                color[j*3] = 1.0f;
+                color[j*3+1] = 1.0f;
+                color[j*3+2] = 1.0f;
+            }
+            else if(points[k+2] < 2)
+            {
+                color[j*3] = 0.00f;
+                color[j*3+1] = 0.50f;
+                color[j*3+2] = 1.00f;
+            }
+            else if(points[k+2] < 5)
+            {
+                color[j*3] = 0.12f;
+                color[j*3+1] = 0.62f;
+                color[j*3+2] = 0.33f;
+            }
+            else
+            {
+                color[j*3] = 0.65f;
+                color[j*3+1] = 0.40f;
+                color[j*3+2] = 0.15f;
+            }
+
+            if(j%2 == 0)
+                k += nbSommets*3;
+            else
+                k = (k - nbSommets*3) + 3;
+
+            ++j;
+
+        }
+
+        glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, sommets);
+        glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, color);
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+
+        glDrawArrays(m_mode, 0, nbSommets*2);
+
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
+
+
+    }
+
+    GLfloat fogColor[] = {0.5f, 0.5f, 0.5f, 1};
+    glFogfv(GL_FOG_COLOR, fogColor);
+    glFogi(GL_FOG_MODE, GL_LINEAR);
+    glFogf(GL_FOG_DENSITY, 0.35f);
+    glFogf(GL_FOG_START, 10.0f);
+    glFogf(GL_FOG_END, 20.0f);
+
 
     m_program->release();
 
     ++m_frame;
 }
+
 //! [5]
