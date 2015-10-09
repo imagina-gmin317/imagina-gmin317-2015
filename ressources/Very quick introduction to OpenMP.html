@@ -1,0 +1,146 @@
+
+<!-- saved from url=(0051)http://olab.is.s.u-tokyo.ac.jp/~reiji/OpenMP-e.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Very quick introduction to OpenMP</title>
+</head>
+
+<body>
+
+<h1>Introduction to OpenMP</h1>
+
+<p>OpenMP is a standard API for shared memory parallel programming.  Here is C binding, but there are C++ and Fortran bindings.  This document is written for OpenMP 3.1.  The <font color="blue">blue parts</font> describe something in relatively new standard, so may be not implemented in all compilers.
+
+</p><p>OpenMP is not an automatic parallelization.  Programmers are responsible for analysis of dependencies and their solution.  If it is used in a wrong way, it results in a wrong result.
+
+</p><p><b>#include <omp.h></omp.h></b><br>
+Defines what is needed to use OpenMP.
+
+</p><p><b>_OPENMP</b><br>
+Defined by the compiler if it compiles the source for OpenMP.  Now a string which represents the version of OpenMP.
+
+</p><p><b>#pragma omp parallel <i>clause</i></b><br>
+The next sentence (or block) is executed in parallel in duplication, i.e., in SPMD.<br>
+The number of threads can be specified by num_threads clause, omp_set_num_threads function, or environmental variable OMP_NUM_THREADS.<br>
+The variables defined within the block are thread-private.  The variables that are declared before the block and the static variables are shared.  You can specify it with shared(<i>variables</i>) or private(<i>variables</i>).
+
+</p><p><b>#pragma omp for <i>clause</i></b><br>
+Distribute the next loop over the threads.  Five methods of distributions can be specified in the clause:
+</p><ul>
+<li><b>schedule(static, <i>chunksize</i>)</b>: Iterations are decomposed into chunks and distributed in a round-robin fashion.  The default chunk size is the number of iterations divided by the number of threads.
+</li><li><b>schedule(dynamic, <i>chunksize</i>)</b>: Iterations are decomposed into chunks and distributed to idle threads.  Default chunk size is 1.
+</li><li><b>schedule(guided, <i>chunksize</i>)</b>: Similar to dynamic, but the chunk size is larger first, then decreases, and finishes at the designated size.
+</li><li><b>schedule(runtime)</b>: Defined by environmental variable OMP_SCHEDULE <font color="blue">or by function omp_set_schedule</font>.
+</li><li><font color="blue"><b>schedule(auto)</b>: Chosen by the compiler or the runtime.</font>
+</li></ul>
+With <b>reduction</b> clause, reduction on the specified variable with the specified operation is done.<br>
+It can be combined as <b>#pragma omp parallel for</b>.
+
+<p><b>#pragma omp single <i>clause</i></b>: Executed by a single thread.
+<br><b>#pragma omp master</b>: Executed by the master thread, i.e. thread 0.
+<br><b>#pragma omp critical (<i>name</i>)</b>: Critical section.  Name can be omitted (unnamed critical section).
+<br><b>#pragma omp atomic <font color="blue">[read|write|update|capture]</font></b>: Atomic operation.  If no clause is attached, "update" is assumed.  The following sentence is limited to x++ and similar ones.
+<br><b>#pragma omp barrier</b>: Barrier synchronization.
+
+</p><p><b>#pragma omp flush (<i>variables</i>)</b>: Construct for memory consistency.  If one wants to make thread 0 write a variable x and thread 1 read the written data, one must guarantee the following four things must happen in this order:
+</p><ul>
+<li>Thread 0 writes the data to variable x.
+</li><li>Thread 0 flushes variable x.
+</li><li>Thread 1 flushes variable x.
+</li><li>Thread 1 reads the data from variable x.
+</li></ul>
+But it is really hard to write such a program correctly.  Don't use it.<br>
+Flush is implicitly executed
+<ul>
+<li>At the entrance and the exit of barrier, critical and parallel, and
+</li><li>At the exit of for and single.
+</li></ul>
+unless nowait clause is specified.<br>
+Note and be careful that implicit flush is not executed
+<ul>
+<li>At the entrance of for and single, and
+</li><li>At the entrance and the exit of master.
+</li></ul>
+
+<p><b>int omp_get_num_threads(void);</b> returns the number of threads.
+<br><b>int omp_get_thread_num(void);</b> returns the own thread number.
+
+</p><p><b>double omp_get_wtime(void);</b> returns the wall-clock time in seconds.
+
+</p><p>Other useful interface includes: functions related to locks, <font color="blue">and task constructs.</font>
+
+</p><h2>Basic things to know</h2>
+
+<p>OpenMP assumes simple parallelism such as parallel for construct.  Fuzzy barrier and pairwise synchronization are not supported by the API.  Reduction on an array is not supported in C/C++.
+
+</p><p>One may be able to write an OpenMP program which can be compiled as a sequential program if OpenMP directives are ignored.  It is strongly recommended to do so, since it is very useful to debug.  Note that debugging in OpenMP is much harder than debugging in MPI.
+
+</p><h3>Private variables</h3>
+
+<p>One must be aware that for each variable whether it is <b>shared or private</b>.  Many bugs are created when one use a shared variable as if it is private.
+
+</p><p>I recommend to make the block to be parallelized into a function, as</p><pre>#pragma omp parallel
+  f(a, b, c);
+</pre> or <pre>#pragma omp parallel for
+  for (i=0; i&lt; n; i++)
+    f(a[i], b[i], c[i]);
+</pre>
+
+<p><font color="blue">There are private variables and thread-private variables.  The names, the slight difference of the concepts, and modifications from the previous versions of OpenMP are too delicate.  I would not use thread-private variables.</font>
+
+
+</p><p>If you want to send a data on a private variable, you need a shared variable for "communication".  Or you can use copyprivate construct.
+
+</p><h3>Synchronization</h3>
+
+<p>If you want to program communication between threads on shared memory, consumer thread must not start reading before the producer completes writing of the data into the shared memory.  This is achieved by synchronization.
+
+</p><p>In data parallel programming, it can be done by barrier synchronization.  Do it as
+</p><ul>
+<li>Each thread writes the data to be sent into the memory.
+</li><li>Do a barrier synchronization.
+</li><li>Each thread reads the data to be received from the memory.
+</li><li>Do a barrier synchronization.
+</li></ul>
+The last barrier is required to prevent a next write to the same memory area.
+
+<p>Dynamic load balancing can be done by using critical or atomic construct.  A little more complex thing can be done with locks.  But note that lock functions are not accompanied by implicit flush (except lock variables).
+
+</p><h2>Weak consistency</h2>
+
+You cannot program a correct communication between threads without flush.  It is not sufficient to put "volatile" into shared variables.  This is because the hardware and the compiler have freedom to change the order of the memory access unless it violates the semantics of sequential programs.  For example,
+<ul>
+<li>out-of-order execution,
+</li><li>prefetch, write buffer, and postload, and
+</li><li>data can be on register rather than on memory.
+</li></ul>
+
+<p>There was much effort to provide the same semantics with parallel program as sequential program.  But every such method requires high overhead.  After all, weak consistency was proposed, where the order of the memory accesses is guaranteed as programmed only against a special synchronization operation, i.e. flush.
+
+</p><p>All the memory accesses before a flush are guaranteed to be done before the flush completes.  Any memory access after the flush is guaranteed not to be started before the flush completes.
+
+</p><p>Debugging shared memory parallel program is much harder than message passing program.  A message passing parallel program is just a sequential program with message passing, but a shared memory parallel program is something very different from sequential program.  In shared memory parallel programs, shared variables could be overwritten by any other threads at an unexpected time.  Worse, such an unexpected execution depends on the timing and not reproducible.  There are some proposals of parallel programming languages which use message passing although they assume shared memory hardware!
+
+</p><h2>Performance tuning</h2>
+
+It is harder to tune performance on shared memory processors than on distributed memory parallel processors.
+
+<p><b>Locality</b>: Shared memory parallel programs tend to have a worse locality than sequential programs.  To recover the performance lost in parallelization, one need to change data layouts and to make some data private.  This is almost equivalent to data distribution on a distributed parallel system.
+
+</p><p><b>Memory contention</b>: If the algorithm performance is memory bandwidth bounded, the parallel performance will be limited by the total memory bandwidth.  To reduce such performance loss, enhancement of cache utilization and latency hiding can be effective.
+
+</p><p><b>Communication overhead</b>:  Memory is far.  Memory is slow.  Since data are communicated through shared memory, it takes a longer time than an access to data on cache.  It is better to reduce "communication", similarly to distributed memory parallelism.
+
+</p><p><b>False sharing</b>:  There is coherence mechanism on cache, and the cache line is the unit of coherence.  Coherence overheads occur when two threads access data on the same cache line, even if they are assigned to the same cache line by the compiler accidentally.  This is false sharing.  It can be reduced by changing data layout.
+
+</p><p><b>Synchronization overhead</b>:  Such functions as barrier synchronization, flush and thread creation are necessary only for parallel processing, and thus parallelization overheads.  However when minimizing them, one easily introduce a new bug, which is hard to debug.  Sometimes bugs are resolved or become invisible by introducing more synchronization than required.
+
+</p><p><b>Load balancing</b>:  Load balancing is general problem in parallel processing.  In shared memory parallelization, execution times fluctuates because of such factors as false sharing and memory access contention, in a way hard to predict.  Thus the execution times are not become equal even with "load" are balanced.  Dynamic load balancing can help.
+
+</p><p><b>Demand-driven communication</b>:  With message passing, the producer can send the data to the consumer as soon as it is generated.  In shared memory parallel programming, data transfer happens only after the consumer requests it.  To solve it we need prefetch.  Also, data on the same cache line will be sent.  Compare it with message passing model, where only the designated data are sent.
+
+</p><p><b>Difficulty of understanding performance</b>:  In message passing model, the major parallelization overheads come from load imbalance and message communication.  We can predict them relatively accurately.  Sometimes performance gain by communication latency hiding and lower cache mishit.  On the contrary, on shared memory processors, performance loss comes not only from load imbalance and synchronization overhead, but also from higher cache mishit and memory access contention.  The latters are hard to predict.
+
+
+
+
+</p></body></html>
