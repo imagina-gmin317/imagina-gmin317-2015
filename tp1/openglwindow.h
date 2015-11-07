@@ -71,12 +71,31 @@ protected:
 
     void exposeEvent(QExposeEvent *event) Q_DECL_OVERRIDE;
 
+    GLfloat m_x;
+    GLfloat m_y;
+    GLfloat m_z;
+
+    GLfloat m_xrotation;
+    GLfloat m_zrotation;
+
+    GLfloat m_xmouse;
+    GLfloat m_ymouse;
+
+    bool m_mouseButtonPressed;
+
+    int m_axe;
+    bool m_drawn;
+    int m_mode;
+
 private:
     bool m_update_pending;
     bool m_animating;
 
     QOpenGLContext *m_context;
     QOpenGLPaintDevice *m_device;
+
+
+
 };
 //! [1]
 
