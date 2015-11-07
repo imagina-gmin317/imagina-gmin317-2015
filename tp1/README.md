@@ -1,0 +1,20 @@
+#Compte-rendu TP1 - Vincent BAZIA
+
+##Affichage surface carrée 
+Pour créer une surface carrée, je crée plusieurs lignes de TRIANGLE_STRIP.
+Pour cela je génère dans un premier temps mes points avec leur coordonnées que je stock dans un tableau. Pour mes vertices je parcours selon un certain ordre mon tableau (ordre d'indices pour un 3x3 : 0,3,1,4,2,5 puis je fais ma seconde bande 3,6,4,7,5,8 et ma surface 3x3 est faite).
+
+##Carte d'altitude
+Je lis l'image avec QImage, une methode pixel(x, y) permet de récupérer la couleur d'un pixel.
+Pour la gestion des hauteurs, lors de la génération de mes points, je fais : maxHeight * qGray(pixelColor) / 255.
+
+##Déplacement caméra
+Je n'ai pas réussi à gérer le déplacement de caméra. Je n'ai pas réussi à gérer les évenements. Je ne comprends pas où est mon erreur.
+
+##Bonus : Texturer en utilisant des couleurs
+J'ai mis 3 couleurs différentes selon la hauteur des points. Bleu si très bas, blanc, si très haut, vert sinon.
+
+
+
+
+
