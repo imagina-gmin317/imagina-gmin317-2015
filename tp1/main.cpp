@@ -46,6 +46,14 @@
 #include <QtGui/QScreen>
 
 #include <QtCore/qmath.h>
+#include <iostream>
+#include <time.h>
+
+using namespace std;
+
+#define longueurCarre 240//16*16
+GLfloat tabPts[longueurCarre*longueurCarre*3];
+bool firstTime = true;
 
 //! [1]
 class TriangleWindow : public OpenGLWindow
@@ -77,6 +85,7 @@ TriangleWindow::TriangleWindow()
 //! [2]
 int main(int argc, char **argv)
 {
+    firstTime = true;
     QGuiApplication app(argc, argv);
 
     QSurfaceFormat format;
@@ -133,6 +142,22 @@ void TriangleWindow::initialize()
 }
 //! [4]
 
+QColor getColor(float z)
+{
+    if(z < 10.0f/5.0f)
+        return QColor(65,105,225,255);//Bleu foncé
+    else if(z < 20.0f/5.0f)
+        return QColor(0,191,255,255);//Bleue clair
+    else if(z < 50.0f/5.0f)
+        return QColor(46,139,87,255);//Vert
+    else if(z < 130.0f/5.0f)
+        return QColor(126, 88, 53,255);//Marron
+    else if(z < 200.0f/5.0f)
+        return QColor(220, 220, 220,255);//Gris clair
+    else
+        return QColor(255,255,255,255);//Blanc
+}
+
 //! [5]
 void TriangleWindow::render()
 {
@@ -144,34 +169,146 @@ void TriangleWindow::render()
     m_program->bind();
 
     QMatrix4x4 matrix;
-    matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
-    matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+    matrix.perspective(60.0f, 4.0f/3.0f/*16.0f/9.0f*/, 0.1f, 500.0f);
+    matrix.translate(this->m_x, this->m_y, this->m_z);
+
+    matrix.rotate(this->m_rotate_y, 1, 0, 0);
+    matrix.rotate(this->m_rotate_x, 0, 0, 1);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-    GLfloat vertices[] = {
-        0.0f, 0.707f,
-        -0.5f, -0.5f,
-        0.5f, -0.5f
-    };
+    GLfloat x = -60.0f;
+    GLfloat y = -60.0f;
+    GLfloat z = 1.0f;
+    GLfloat dist = 1.0;
 
-    GLfloat colors[] = {
-        1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 1.0f
-    };
+    int cpt = 0;
+    glEnable(GL_FOG);
+    GLfloat fogColor[] = {0.5f, 0.5f, 0.5f, 1};
+    //glClearColor(0.5f, 0.5f, 0.5f, 1);
 
-    glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+    if(firstTime)
+    {
+        QImage img ("C:/Users/CloudDeLuna/Documents/GitHub/imagina-gmin317-2015/tp1/heightmap-1.png");
+        if (!img.isNull())
+        {
+            srand(time(NULL));
+            for (int i =0; i < longueurCarre; ++i)
+            {
+                x = 0.0f;
+                for(int k = 0; k < longueurCarre; ++k)
+                {
+                    tabPts[cpt] = y;
+                    tabPts[cpt+1] = x;
+                    tabPts[cpt+2] = -(qGray(img.pixel(i, k)) / 5);
 
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+                    cpt += 3;
+                    x += dist;
+                }
+                y += dist;
+            }
+        }
+        else
+        {
+            srand(time(NULL));
+            for (int i =0; i < longueurCarre; ++i)
+            {
+                x = 0.0f;
+                for(int k = 0; k < longueurCarre; ++k)
+                {
+                    tabPts[cpt] = y;
+                    tabPts[cpt+1] = x;
+                    tabPts[cpt+2] = rand()%100 > 70 ? (float)rand()/RAND_MAX : 0.0f;//(float)rand()/RAND_MAX;
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+                    cpt += 3;
+                    x += dist;
+                }
+                y += dist;
+            }
+        }
+        firstTime = false;
+    }
 
-    glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(0);
+    int longCarrCube = longueurCarre*3;
+    int j = 0;
+
+    for(int i = 0; i < longueurCarre - 1; ++i)
+    {
+        GLfloat vertices[(longueurCarre-1)*3*3*2];
+        GLfloat colors[(longueurCarre-1)*3*3*2];
+
+        j = i* longCarrCube;
+
+        for(int k = 0; k < (longueurCarre-1)*3*3*2; k += 18)
+        {
+            vertices[k]     = tabPts[j];
+            vertices[k+1]   = tabPts[j+1];
+            vertices[k+2]   = tabPts[j+2];
+
+            QColor color = getColor(-tabPts[j+2]);
+            colors[k]   = color.red()/255.0f;
+            colors[k+1] = color.green()/255.0f;
+            colors[k+2] = color.blue()/255.0f;
+
+            vertices[k+3] = tabPts[j+3];
+            vertices[k+4] = tabPts[j+4];
+            vertices[k+5] = tabPts[j+5];
+
+            color = getColor(-tabPts[j+5]);
+            colors[k+3]  = color.red()/255.0f;
+            colors[k+4] = color.green()/255.0f;
+            colors[k+5] = color.blue()/255.0f;
+
+            vertices[k+6] = tabPts[j+longCarrCube];
+            vertices[k+7] = tabPts[j+longCarrCube+1];
+            vertices[k+8] = tabPts[j+longCarrCube+2];
+
+            color = getColor(-tabPts[j+longCarrCube+2]);
+            colors[k+6]  = color.red()/255.0f;
+            colors[k+7] = color.green()/255.0f;
+            colors[k+8] = color.blue()/255.0f;
+
+            vertices[k+9] = tabPts[j+3];
+            vertices[k+10] = tabPts[j+4];
+            vertices[k+11] = tabPts[j+5];
+
+            color = getColor(-tabPts[j+5]);
+            colors[k+9]  = color.red()/255.0f;
+            colors[k+10] = color.green()/255.0f;
+            colors[k+11] = color.blue()/255.0f;
+
+            vertices[k+12] = tabPts[j+longCarrCube+3];
+            vertices[k+13] = tabPts[j+longCarrCube+4];
+            vertices[k+14] = tabPts[j+longCarrCube+5];
+
+            color = getColor(-tabPts[j+longCarrCube+5]);
+            colors[k+12]  = color.red()/255.0f;
+            colors[k+13] = color.green()/255.0f;
+            colors[k+14] = color.blue()/255.0f;
+
+            vertices[k+15] = tabPts[j+longCarrCube];
+            vertices[k+16] = tabPts[j+longCarrCube+1];
+            vertices[k+17] = tabPts[j+longCarrCube+2];
+
+            color = getColor(-tabPts[j+longCarrCube+2]);
+            colors[k+15]  = color.red()/255.0f;
+            colors[k+16] = color.green()/255.0f;
+            colors[k+17] = color.blue()/255.0f;
+
+            j += 3;
+        }
+
+        glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+        glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+
+        //glEnable(GL_CULL_FACE);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glDrawArrays(this->m_affichage, 0, (longueurCarre-1)*2*3);
+        //GL_LINE_LOOP
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
+    }
 
     m_program->release();
 

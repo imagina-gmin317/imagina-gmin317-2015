@@ -45,6 +45,7 @@
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLPaintDevice>
 #include <QtGui/QPainter>
+#include <QKeyEvent>
 
 //! [1]
 OpenGLWindow::OpenGLWindow(QWindow *parent)
@@ -97,14 +98,96 @@ void OpenGLWindow::renderLater()
 
 bool OpenGLWindow::event(QEvent *event)
 {
-    switch (event->type()) {
-    case QEvent::UpdateRequest:
+    switch (event->type())
+    {
+      case QEvent::UpdateRequest:
         m_update_pending = false;
         renderNow();
         return true;
-    default:
+      case QEvent::Wheel:
+      {
+        QWheelEvent* ev = (QWheelEvent*)event;
+        if(ev->delta()>0)
+            m_z += 20.0f;
+        else if (ev->delta() < 0)
+            m_z -= 20.0f;
+        renderNow();
+        return true;
+      }
+      case QKeyEvent::KeyPress:
+      {
+        switch(((QKeyEvent*)event)->key())
+        {
+          case Qt::Key_S:
+            m_x -= 5.0f;
+            break;
+          case Qt::Key_F:
+            m_x += 5.0f;
+            break;
+          case Qt::Key_E:
+            m_y += 5.0f;
+            break;
+          case Qt::Key_D:
+            m_y -= 5.0f;
+            break;
+          case Qt::Key_Minus:
+            m_z -= 5.0f;
+            break;
+          case Qt::Key_Plus:
+            m_z += 5.0f;
+            break;
+          case Qt::Key_Left:
+            m_rotate_x = m_rotate_x - 10.0f;
+            break;
+          case Qt::Key_Right:
+            m_rotate_x = m_rotate_x + 10.0f;
+            break;
+          case Qt::Key_Down:
+            m_rotate_y = m_rotate_y - 10.0f;
+            break;
+          case Qt::Key_Up:
+            m_rotate_y = m_rotate_y + 10.0f;
+            break;
+          case Qt::Key_1:
+            m_affichage = GL_TRIANGLES;
+            break;
+          case Qt::Key_2:
+            m_affichage = GL_LINES;
+            break;
+          case Qt::Key_3:
+            m_affichage = GL_LINE_LOOP;
+            break;
+          default:
+            return QWindow::event(event);
+        }
+        renderNow();
+        return true;
+      }
+      default:
         return QWindow::event(event);
     }
+}
+
+void OpenGLWindow::mouseMoveEvent(QMouseEvent *mouseEvent)
+{
+    if(mouseEvent->buttons() & Qt::LeftButton)
+    {
+        if(mouseEvent->x() > m_old_r_x)
+            m_rotate_x = m_rotate_x + 3.0f;
+        else if(mouseEvent->x() < m_old_r_x)
+            m_rotate_x = m_rotate_x - 3.0f;
+    }
+
+    if(mouseEvent->buttons() & Qt::RightButton)
+    {
+        if(mouseEvent->x() > m_old_r_x)
+            m_rotate_y = m_rotate_y + 3.0f;
+        else if(mouseEvent->x() < m_old_r_x)
+            m_rotate_y = m_rotate_y - 3.0f;
+    }
+
+    m_old_r_x = mouseEvent->x();
+    m_old_r_y = mouseEvent->x();
 }
 
 void OpenGLWindow::exposeEvent(QExposeEvent *event)

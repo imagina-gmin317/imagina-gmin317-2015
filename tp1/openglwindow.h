@@ -51,6 +51,16 @@ QT_END_NAMESPACE
 class OpenGLWindow : public QWindow, protected QOpenGLFunctions
 {
     Q_OBJECT
+protected:
+    float m_x = -3;
+    float m_y = -3;
+    float m_z = -200;
+    int m_affichage = GL_TRIANGLES;
+    int m_rotate_x = 0;
+    int m_old_r_x = 0;
+    int m_rotate_y = 0;
+    int m_old_r_y = 0;
+    bool m_mouse_pressed = false;
 public:
     explicit OpenGLWindow(QWindow *parent = 0);
     ~OpenGLWindow();
@@ -70,7 +80,7 @@ protected:
     bool event(QEvent *event) Q_DECL_OVERRIDE;
 
     void exposeEvent(QExposeEvent *event) Q_DECL_OVERRIDE;
-
+    void mouseMoveEvent(QMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
 private:
     bool m_update_pending;
     bool m_animating;
