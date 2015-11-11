@@ -46,25 +46,43 @@
 #include <QtGui/QScreen>
 
 #include <QtCore/qmath.h>
+#include <QtGlobal>
+#include <QtGui/QImage>
+#include <QCursor>
 
 //! [1]
 class TriangleWindow : public OpenGLWindow
 {
 public:
     TriangleWindow();
+     int sizeX;
+     int sizeY;
+
 
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
 
+protected:
+    bool event(QEvent *event) Q_DECL_OVERRIDE;
+
 private:
     GLuint loadShader(GLenum type, const char *source);
+    GLfloat* initVertices(GLint countX, GLint countY);
+    float getRandomZ(float i, float j);
 
     GLuint m_posAttr;
     GLuint m_colAttr;
+    GLuint m_normalAttr;
     GLuint m_matrixUniform;
+    QCursor* cursor;
+    GLfloat* vertices;
+    QImage image;
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
+    bool fill;
+    float xAngle, zAngle, y, x;
+    int direction;
 };
 
 TriangleWindow::TriangleWindow()
@@ -72,6 +90,54 @@ TriangleWindow::TriangleWindow()
     , m_frame(0)
 {
 }
+
+GLfloat *TriangleWindow::initVertices(GLint countX, GLint countY)
+{
+    int count = countX * countY * 3 * 2 + countX * 3 + 3;
+    qDebug() << count;
+    GLfloat *array = new GLfloat[count];
+    GLfloat stepX = 1.0 / (countX);
+    GLfloat stepY = 1.0 / (countY);
+    int cpt = 0;
+
+    float posX = -0.5f;
+    float posY = -0.5f;
+
+    int flop = 1;
+
+    for (int i = 0; i < countX; ++i) {
+        for (int j = 0; j < countY; ++j) {
+            array[cpt++] = posX;
+            array[cpt++] = posY;
+            array[cpt++] = getRandomZ(posX, posY);
+
+            array[cpt++] = posX + stepX;
+            array[cpt++] = posY;
+            array[cpt++] = getRandomZ(posX + stepX, posY);
+
+            posY += stepY * flop;
+        }
+
+        array[cpt++] = posX;
+        array[cpt++] = posY;
+        array[cpt++] = getRandomZ(posX, posY);
+
+        flop *= -1;
+        posX += stepX;
+    }
+
+    array[cpt++] = posX;
+    array[cpt++] = posY;
+    array[cpt++] = getRandomZ(posX, posY);
+    qDebug() << cpt;
+    return array;
+}
+
+float TriangleWindow::getRandomZ(float i, float j)
+{
+    return qGray(this->image.pixel((this->sizeX * (i + 0.5f)), (this->sizeY * (j + 0.5f)))) * 0.0008f;
+}
+
 //! [1]
 
 //! [2]
@@ -84,7 +150,7 @@ int main(int argc, char **argv)
 
     TriangleWindow window;
     window.setFormat(format);
-    window.resize(640, 480);
+    window.resize(800, 600);
     window.show();
 
     window.setAnimating(true);
@@ -96,20 +162,32 @@ int main(int argc, char **argv)
 
 //! [3]
 static const char *vertexShaderSource =
-    "attribute highp vec4 posAttr;\n"
-    "attribute lowp vec4 colAttr;\n"
-    "varying lowp vec4 col;\n"
-    "uniform highp mat4 matrix;\n"
-    "void main() {\n"
-    "   col = colAttr;\n"
-    "   gl_Position = matrix * posAttr;\n"
-    "}\n";
+        "attribute highp vec4 posAttr;\n"
+        "attribute lowp vec4 colAttr;\n"
+        "varying lowp vec4 col;\n"
+        "uniform highp mat4 matrix;\n"
+        "float rand(vec2 co){ \n"
+        "return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n"
+        "}\n"
+
+        "void main() {\n"
+
+        "	if(posAttr.z < 0.08 - rand(posAttr.xz) * 0.03) { \n"
+        "	  col = vec4(0 + posAttr.z, 0.4, 0, 1) * (pow((1 + posAttr.z), 3) - 0.8) * 2; \n"
+        "	} else if (posAttr.z > 0.08 - rand(posAttr.xz) * 0.03 && posAttr.z < 0.15) { \n"
+        "	  col = vec4(0.54, 0.27 + posAttr.z, 0.07, 1) * (pow((1 + posAttr.z), 3) - 1); \n"
+        "	} else if(posAttr.z > 0.15){ \n"
+        "	  col = vec4(0.9, 0.9, 0.8, 1) * (pow((1 + posAttr.z), 3) - 1); \n"
+        "	} \n"
+
+        "   gl_Position = matrix * posAttr;\n"
+        "}\n";
 
 static const char *fragmentShaderSource =
-    "varying lowp vec4 col;\n"
-    "void main() {\n"
-    "   gl_FragColor = col;\n"
-    "}\n";
+        "varying lowp vec4 col;\n"
+        "void main() {\n"
+        "   gl_FragColor = col;\n"
+        "}\n";
 //! [3]
 
 //! [4]
@@ -130,51 +208,104 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
+
+    this->image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
+    this->sizeX = this->image.width();
+    this->sizeY = this->image.height();
+    this->vertices = initVertices(sizeX, sizeY);
+    xAngle = 0;
+    zAngle = 0;
+    y = 0;
+    x = 0;
+    this->direction = 0;
+    this->cursor = new QCursor(Qt::BlankCursor);
+    this->setCursor(*cursor);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    glEnable(GL_CULL_FACE);
+
 }
 //! [4]
 
 //! [5]
 void TriangleWindow::render()
 {
-    const qreal retinaScale = devicePixelRatio();
-    glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+    this->cursor->setPos(this->position().x() + width() * 0.5f, this->position().y() + height() * 0.5f);
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    qreal retinaScale = 16.0f/9.0f;
+    glViewport(-width() * 0.5f, -height() * 0.5f, width() * retinaScale, height() * retinaScale);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_program->bind();
 
+
+
     QMatrix4x4 matrix;
-    matrix.perspective(60.0f, 16.0f/9.0f, 0.1f, 100.0f);
-    matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+    matrix.perspective(60.0f, 16.0f/9.0f, 0.01f, 1.0f);
+    matrix.rotate(100.0f * xAngle, 1, 0, 0);
+    matrix.rotate(100.0f * zAngle, 0, 0, 1);
+
+    if(direction != 0) {
+        x += (matrix.data()[4]) * 0.001f * direction;
+        y -= (matrix.data()[0]) * 0.001f * direction;
+    }
+
+    matrix.translate(x, y, - getRandomZ(-x, -y) - 0.02f);
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-    GLfloat vertices[] = {
-        0.0f, 0.707f,
-        -0.5f, -0.5f,
-        0.5f, -0.5f
-    };
-
-    GLfloat colors[] = {
-        1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 1.0f
-    };
-
-    glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
 
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    glDisableVertexAttribArray(1);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeX * sizeY * 2 + sizeX + 1);
     glDisableVertexAttribArray(0);
-
     m_program->release();
 
     ++m_frame;
+
+}
+
+bool TriangleWindow::event(QEvent *event)
+{
+    QKeyEvent *keyEvent;
+    QMouseEvent *mouseEvent;
+    float deltaX = this->width() * 0.5f;
+    float deltaY = this->height() * 0.5f;
+
+    switch (event->type()) {
+    case QEvent::MouseMove:
+        mouseEvent = static_cast<QMouseEvent*>(event);
+        this->zAngle -= (deltaX - mouseEvent->x()) * 0.001f;
+        this->xAngle -= (deltaY - mouseEvent->y()) * 0.001f;
+        return true;
+    case QEvent::KeyPress:
+        keyEvent = static_cast<QKeyEvent*>(event);
+
+        if(keyEvent->key() == Qt::Key_Space) {
+            if(fill) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            } else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            fill = !fill;
+        } else if(keyEvent->key() == Qt::Key_Up) {
+            direction = 1;
+        } else if(keyEvent->key() == Qt::Key_Down) {
+            direction = -1;
+        } else if (keyEvent->key() == Qt::Key_Escape) {
+            qApp->exit();
+        }
+
+        return true;
+    case QEvent::KeyRelease:
+        keyEvent = static_cast<QKeyEvent*>(event);
+        if(keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down) {
+            direction = 0;
+        }
+        return true;
+    }
+    OpenGLWindow::event(event);
 }
 //! [5]
